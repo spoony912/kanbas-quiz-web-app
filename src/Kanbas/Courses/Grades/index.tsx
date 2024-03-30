@@ -1,10 +1,10 @@
 import { assignments, enrollments, grades, users } from "../../Database";
-import { useParams } from "react-router-dom";
 import "../index.css";
 import "../Modules/index.css";
 import "./index.css";
 import { HiOutlineRadio } from "react-icons/hi2";
 import { FaSignInAlt, FaSignOutAlt, FaCog, FaSearch, FaFilter } from "react-icons/fa";
+import { useParams } from "react-router";
 
 
 function Grades(){
@@ -65,7 +65,7 @@ function Grades(){
                         <select className="form-select form-control-lg">
                             <option selected>Search Students</option>
                             {es.map((enrollment) => {
-                                    const user = users.find(user => user._id === enrollment.user && enrollment.course === courseId);
+                                    const user = users.find( (user:any)=> user._id === enrollment.user && enrollment.course === courseId);
                                     return (
                                         <option key={user?._id}>{user?.firstName} {user?.lastName}</option>
                                     );
@@ -109,7 +109,7 @@ function Grades(){
               </thead>
               <tbody className="align-middle text-center">
                 {es.map((enrollment) => {
-                  const user = users.find((user) => user._id === enrollment.user);
+                  const user = users.find((user:any) => user._id === enrollment.user);
                   return (
                     <tr>
                        <td  className="text-danger">{user?.firstName} {user?.lastName}</td>

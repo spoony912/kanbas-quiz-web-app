@@ -8,30 +8,39 @@ import Assignments from "./Assignments";
 import AssignmentEditor from "./Assignments/Editor";
 import Grades from "./Grades";
 import "./index.css";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { FaBars, FaCaretDown, FaTimes,FaTachometerAlt, FaRegUserCircle, FaBook, FaRegCalendarAlt, FaInbox, FaHistory, FaLaptop, FaArrowAltCircleRight, FaQuestionCircle} from "react-icons/fa";
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-// ----- interface
-interface Course {
-  _id: string;
-  name: string;
-  number: string;
-  startDate: string;
-  endDate: string;
-  image?: string;   // Assuming that image is optional
-}
 
-interface CoursesProps {
-  courses: Course[];
-}
-
-
-function Courses( {courses}: CoursesProps) {
+function Courses() {
     const { courseId } = useParams();
-    const course = courses.find((course) => course._id === courseId);
-
+    const COURSES_API = "http://localhost:4000/api/courses";
     const location = useLocation();
     const currentPage = location.pathname.split("/").pop();
+
+    const [course, setCourse] = useState<any>({_id:""});
+    const findCourseById = async(courseId?: string)=>{
+        const response = await axios.get(`${COURSES_API}/${courseId}`);
+        setCourse(response.data);
+    };
+
+    useEffect( ()=>{
+      findCourseById(courseId);
+    }, [courseId]);
+
+    // const fetchCourse = async(courseId?:string) => {
+    //     const course = await client.fetchCourseById(courseId);
+    //     setCourse(course);
+    // };
+
+    // useEffect( () => {
+    //     fetchCourse(courseId);
+    
+    // },[courseId]);
+
+
     
 
     return(
