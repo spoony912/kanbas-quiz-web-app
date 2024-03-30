@@ -1,5 +1,4 @@
-//-----------------------------------------------------------------------------//
-import React from "react"; // must
+import React, { useState, useEffect } from "react";
 import { FaCheckCircle, FaEllipsisV, FaPlusCircle } from "react-icons/fa"; // icon
 import { BsThreeDotsVertical } from "react-icons/bs"; // icon
 import { Link, useParams, useNavigate } from "react-router-dom";
@@ -7,18 +6,46 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import * as db from "../../Database";
 import { useSelector } from "react-redux";
 import { KanbasState } from "../../store";
-import { deleteAssignment } from "./assignmentsReducer";
+import {
+  setAssignments,
+  addAssignment,
+  deleteAssignment,
+  updateAssignment,
+  selectAssignment,
+} from "./assignmentsReducer";
 import { useDispatch } from "react-redux";
-//-----------------------------------------------------------------------------//
+import * as client from "./client";
+
 function Assignments() {
   const { courseId, assignmentId } = useParams();
-  // const assignmentList = db.assignments.filter(
-  //   (each: any) => each.course === courseId
-  // ); // use courseId here
+  useEffect(() => {
+    client
+      .findAssignmentsForCourse(courseId)
+      .then((assignments) => dispatch(setAssignments(assignments)));
+  }, [courseId]);
+  // add assignment
+  const handleAddAssignment = () => {
+    addAssignment(courseId, assignment).then((assignment) => {
+      dispatch(addAssignment(assignment));
+    });
+  };
+
+  // delete assignment
+  const handleDeleteAssignment = (assignmentId) => {
+    client
+      .deleteAssignment(assignmentId)
+      .then(() => {
+        dispatch(deleteAssignment(assignmentId));
+      })
+      .catch((error) => {
+        console.error("Failed to delete assignment:", error);
+      });
+  };
+
   const assignment = useSelector(
-    (state: KanbasState) => state.assignmentsReducer.assignment
+    (state) => state.assignmentsReducer.assignment
   );
-  const assignmentList = useSelector((state: KanbasState) =>
+  const assignmentList = useSelector((state) =>
     state.assignmentsReducer.assignments.filter(
       (each) => each.course === courseId
     )
@@ -29,17 +56,18 @@ function Assignments() {
   };
   const dispatch = useDispatch();
 
-  const handleDelete = (_id: any) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this assignment?"
-    );
-    if (isConfirmed) {
-      // delete
-      dispatch(deleteAssignment(_id));
-    } else {
-      // no delete
-    }
-  };
+  // const handleDelete = (_id: any) => {
+  //   const isConfirmed = window.confirm(
+  //     "Are you sure you want to delete this assignment?"
+  //   );
+  //   if (isConfirmed) {
+  //     // delete
+  //     dispatch(deleteAssignment(_id));
+  //   } else {
+  //     // no delete
+  //     // do nothing
+  //   }
+  // };
   return (
     <>
       {/* Add buttons and other fields here  */}
@@ -82,7 +110,7 @@ function Assignments() {
                 {/* delete button */}
                 <button
                   className="btn btn-danger btn-sm me-2"
-                  onClick={() => handleDelete(_id)}
+                  onClick={() => handleDeleteAssignment(_id)}
                 >
                   Delete
                 </button>

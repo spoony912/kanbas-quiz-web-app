@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-// import { assignments } from "../../../Database";
-import * as db from "../../../Database";
 import { BsThreeDotsVertical } from "react-icons/bs"; // icon
 import { TbCircleCheckFilled } from "react-icons/tb"; // icon
 // import reducer
@@ -13,6 +11,7 @@ import {
 } from "../assignmentsReducer";
 import { KanbasState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
+import * as client from "../client";
 
 function AssignmentEditor() {
   const { assignmentId, courseId } = useParams();
@@ -20,7 +19,7 @@ function AssignmentEditor() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const assignments = useSelector((state: KanbasState) =>
+  const assignments = useSelector((state) =>
     state.assignmentsReducer.assignments.filter(
       (each) => each.course === courseId
     )
@@ -64,13 +63,32 @@ function AssignmentEditor() {
     }
   }, [assignmentId, assignments, courseId, assignmentDetails._id]);
 
+  // const handleSave = () => {
+  //   if (assignmentId === "new") {
+  //     dispatch(addAssignment(assignmentDetails));
+  //   } else {
+  //     dispatch(updateAssignment(assignmentDetails));
+  //   }
+  //   navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+  // };
   const handleSave = () => {
-    if (assignmentId === "new") {
-      dispatch(addAssignment(assignmentDetails));
-    } else {
-      dispatch(updateAssignment(assignmentDetails));
-    }
-    navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+    // Debugging: Log to ensure assignmentDetails includes _id when updating
+    console.log("Saving assignmentDetails:", assignmentDetails);
+
+    const saveOperation =
+      assignmentId === "new"
+        ? client.createAssignment(courseId, assignmentDetails) // Create a new assignment
+        : client.updateAssignment(assignmentDetails); // Update existing assignment
+
+    saveOperation
+      .then(() => {
+        // After a successful operation, navigate back to the list of assignments
+        navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+      })
+      .catch((error) => {
+        // Log any errors encountered during the save operation
+        console.error("Error saving assignment:", error);
+      });
   };
 
   const handleCancel = () =>

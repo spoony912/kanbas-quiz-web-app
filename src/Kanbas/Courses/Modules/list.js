@@ -1,9 +1,9 @@
 // imported to src/Kanbas/Courses/Modules/index.tsx
 //-----------------------------------------------------------------------------//
-import React, { useState } from "react"; // must
+import React, { useState, useEffect } from "react";
 import "./index.css"; // own css
 // import { modules } from "../../Database"; // database
-import * as db from "../../Database";
+// import * as db from "../../Database";
 import { FaEllipsisV, FaCheckCircle, FaPlusCircle } from "react-icons/fa"; // fontawesome
 import { useParams } from "react-router"; // extract courseId
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -13,74 +13,42 @@ import {
   deleteModule,
   updateModule,
   setModule,
+  setModules,
 } from "./modulesReducer";
-import { KanbasState } from "../../store";
-
+// import { KanbasState } from "../../store";
+import * as client from "./client";
 //-----------------------------------------------------------------------------//
 function ModuleList() {
-  const { courseId } = useParams(); // extract router id in url
-  // after import reducer
-  // const moduleList = useSelector((state) => state.modulesReducer.modules);
-  const modules = useSelector(
-    (state: KanbasState) => state.modulesReducer.modules
-  );
-  const module = useSelector(
-    (state: KanbasState) => state.modulesReducer.module
-  );
+  const { courseId } = useParams();
+  useEffect(() => {
+    client
+      .findModulesForCourse(courseId)
+      .then((modules) => dispatch(setModules(modules)));
+  }, [courseId]);
+
+  // add module
+  const handleAddModule = () => {
+    client.createModule(courseId, module).then((module) => {
+      dispatch(addModule(module));
+    });
+  };
+
+  // delete module
+  const handleDeleteModule = (moduleId) => {
+    client.deleteModule(moduleId).then((status) => {
+      dispatch(deleteModule(moduleId));
+    });
+  };
+
+  // update
+  const handleUpdateModule = async () => {
+    const status = await client.updateModule(module);
+    dispatch(updateModule(module));
+  };
+
+  const modules = useSelector((state) => state.modulesReducer.modules);
+  const module = useSelector((state) => state.modulesReducer.module);
   const dispatch = useDispatch();
-  // before import reducer
-  // const modulesList = modules.filter((module) => module.course === courseId); // use courseId
-  // const [selectedModule, setSelectedModule] = useState(modulesList[0]);
-  // const [moduleList, setModuleList] = useState(modules);
-  // // create new module
-  // const [module, setModule] = useState({
-  //   _id: "0",
-  //   name: "New Module",
-  //   description: "New Description",
-  //   course: courseId || "",
-  // });
-
-  // // add module
-  // const addModule = (module: any) => {
-  //   const newModule = { ...module, _id: new Date().getTime().toString() };
-  //   const newModuleList = [newModule, ...moduleList];
-  //   setModuleList(newModuleList);
-  // };
-
-  // // delete module
-  // const deleteModule = (moduleId: string) => {
-  //   const newModuleList = moduleList.filter(
-  //     (module) => module._id !== moduleId
-  //   );
-  //   setModuleList(newModuleList);
-  // };
-
-  // // update module
-  // const updateModule = () => {
-  //   const newModuleList = moduleList.map((m) => {
-  //     if (m._id === module._id) {
-  //       // Ensure all expected properties, including 'lessons', are present
-  //       return {
-  //         ...m, // keeps existing module properties, including lessons
-  //         ...module, // applies updates, possibly overriding some properties but not 'lessons'
-  //       };
-  //     } else {
-  //       return m;
-  //     }
-  //   });
-  //   setModuleList(newModuleList);
-  // };
-
-  // const updateModule = () => {
-  //   const newModuleList = moduleList.map((m) => {
-  //     if (m._id === module._id) {
-  //       return module;
-  //     } else {
-  //       return m;
-  //     }
-  //   });
-  //   setModuleList(newModuleList);
-  // };
 
   return (
     <>
@@ -121,15 +89,12 @@ function ModuleList() {
             }
           />
           <button
-            onClick={() => dispatch(addModule({ ...module, course: courseId }))}
             className="btn btn-primary mt-2 mb-2"
+            onClick={handleAddModule}
           >
             Add
           </button>
-          <button
-            onClick={() => dispatch(updateModule(module))}
-            className="btn btn-success"
-          >
+          <button className="btn btn-success" onClick={handleUpdateModule}>
             Update
           </button>
         </li>
@@ -146,7 +111,7 @@ function ModuleList() {
               </button>
               <button
                 className="btn btn-danger"
-                onClick={() => dispatch(deleteModule(module._id))}
+                onClick={() => handleDeleteModule(module._id)}
               >
                 Delete
               </button>
@@ -181,7 +146,7 @@ function ModuleList() {
               {/* lesson name */}
               {module.lessons && (
                 <ul className="list-group">
-                  {module.lessons.map((lesson: any, index: any) => (
+                  {module.lessons.map((lesson, index) => (
                     <li key={index} className="list-group-item">
                       <FaEllipsisV className="me-2" />
                       {lesson.name}

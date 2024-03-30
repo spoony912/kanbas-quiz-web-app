@@ -19,8 +19,9 @@ import Assignments from "./Assignments";
 import AssignmentEditor from "./Assignments/Editor";
 // grade
 import Grades from "./Grades";
-
-
+import React, { useState, useEffect } from "react";
+import * as client from "../Courses/client";
+import axios from "axios";
 // ------ interface
 interface Course {
   _id: string;
@@ -35,9 +36,24 @@ interface CoursesProps {
   courses: Course[];
 }
 //-----------------------------------------------------------------------------//
-function Courses({ courses }:CoursesProps) {
+function Courses({ courses }: CoursesProps) {
   const { courseId } = useParams(); // extract courseID from URL path
-  const course = courses.find((course) => course._id === courseId); // use courseId here
+  // const [courseUseState, setCourseUseState] = useState<any>({ _id: "" });
+  const [courseUseState, setCourseUseState] = useState<Course | null>(null);
+  // const fetchCourse = async (courseId?: string) => {
+  //   const course = await client.fetchCourseById(courseId);
+  //   setCourseUseState(course);
+  // };
+
+  const findCourseById = async (courseId?: string) => {
+    if (!courseId) return;
+    const course = await client.fetchCourseById(courseId);
+    setCourseUseState(course);
+  };
+  useEffect(() => {
+    findCourseById(courseId);
+  }, [courseId]);
+  // const course = courses.find((course) => course._id === courseId); // use courseId here
   const location = useLocation(); // breadcrumb: Use useLocation hook to get the current location
 
   // Extract the current page from the URL
@@ -58,7 +74,7 @@ function Courses({ courses }:CoursesProps) {
         }}
       >
         <HiMiniBars3 style={{ marginRight: "30px", marginLeft: "30px" }} />
-        {course?.number} {course?.name} {">"} {formattedPage}
+        {courseUseState?.number} {courseUseState?.name} {">"} {formattedPage}
       </h3>
 
       {/* Home, Module ... */}

@@ -121,14 +121,12 @@
 
 // export default Dashboard;
 
-
 // from gpt
-import React from "react"; // React import
+import React, { useState, useEffect } from "react"; // React import
 import { Link } from "react-router-dom"; // Link for routing
 import courseImage from "./reactjs.jpg"; // Import image
 import "./index.css"; // Import CSS
-
-
+import * as client from "../Courses/client";
 // -------- interface
 interface Course {
   _id: string;
@@ -154,7 +152,16 @@ function Dashboard({
   addNewCourse,
   deleteCourse,
   updateCourse,
-}:DashboardProps) {
+}: DashboardProps) {
+  // new
+  const [coursesUseState, setCoursesUseState] = useState<any[]>([]);
+  const findALLCourses = async () => {
+    const courses = await client.fetchALLCourses();
+    setCoursesUseState(courses);
+  };
+  useEffect(() => {
+    findALLCourses();
+  }, []);
   return (
     <div className="p-4">
       <h1>Dashboard</h1>
