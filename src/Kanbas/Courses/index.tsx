@@ -18,7 +18,9 @@ import { FaBars, FaCaretDown, FaTimes,FaTachometerAlt, FaRegUserCircle, FaBook, 
 
 function Courses() {
     const { courseId } = useParams();
-    const COURSES_API = "http://localhost:4000/api/courses";
+    // const COURSES_API = "http://localhost:4000/api/courses";
+    // const COURSES_API = "https://kanbas-node-server-app.onrender.com/api/courses";
+    const API_BASE = process.env.REACT_APP_API_BASE;
     const location = useLocation();
     const currentPage = location.pathname.split("/").pop();
 
