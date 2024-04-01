@@ -1,108 +1,167 @@
 import React , {useEffect, useState} from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { assignments } from "../../../Database";
 import { HiCheckCircle } from "react-icons/hi";
 import { HiEllipsisVertical } from "react-icons/hi2";
-import { addAssignment, updateAssignment } from "../assignmentsReducer";
 import { useDispatch, useSelector } from "react-redux";
 import "../../index.css";
-import { KanbasState } from "../../../store";
-
+import * as client from "../client";
+import { addAssignment, deleteAssignment, updateAssignment, selectAssignment} from "../assignmentsReducer";
 function AssignmentEditor() {
 
-    const { assignmentId } = useParams();
-    const { courseId } = useParams();
+
+    const { courseId, assignmentId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const assignments = useSelector((state:KanbasState) => state.assignmentsReducer.assignments);
+    const assignments = useSelector((state) => state.assignmentsReducer.assignments.filter((each)=> each.course === courseId));
+
+
     const [assignment, setAssignment] = useState(
         {
             _id: null,
             title: "",
             description: "",
             due: "",
-            totalPoints: 0,
-            course: "",
+            totalPoints: 100,
+            course: courseId,
         }
     );
 
-    useEffect(() => {
-        if(assignmentId === "new") {
-            setAssignment({
-                _id: null,
-                title: "",
-                description: "",
-                due: "",
-                totalPoints: 0,
-                course: courseId ?? "",
-            });
-        } else {
-            const existedAssignment = assignments.find((a) => a._id === assignmentId);
-            if(existedAssignment) {
-                setAssignment(existedAssignment);
-            }
-            else {
-                // can not find the assignment
-            }
+    // useEffect(() => {
+    //     if(assignmentId === "new") {
+    //         setAssignment({
+    //             _id: null,
+    //             title: "",
+    //             description: "",
+    //             due: "",
+    //             totalPoints: 0,
+    //             course: courseId,
+    //         });
+    //     } else {
+    //         const existedAssignment = assignments.find((a) => a._id === assignmentId);
+    //         if(existedAssignment) {
+    //             setAssignment(existedAssignment);
+    //         }
+    //         else {
+    //             // can not find the assignment
+    //         }
             
-        }
-    }, [assignmentId, assignments, courseId]);
+    //     }
+    // }, [assignmentId, assignments, courseId]);
 
-    const [newAssignment, setNewAssignment] = useState( () => {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('id') === "new";
-    });
-
-    const handleSave = async() => {
-        if(assignmentId === "new") {
-            const newId = new Date().getTime().toString();
-            const newAssignment = {
-                ...assignment, 
-                _id: newId,
-                course: courseId ?? "",
-            };
-            const actionResult = dispatch(addAssignment(newAssignment));
-            console.log('New Assignment added:', actionResult.payload);
-            navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+    useEffect(() => {
+        // existing ass
+        if (assignmentId && assignmentId !== "new") {
+          const assignmentToEdit = assignments.find(
+            (assn) => assn._id === assignmentId
+          );
+          // Only set if assignmentToEdit is different from the current state to avoid infinite loops
+          if (assignmentToEdit && assignmentToEdit._id !== assignment._id) {
+            setAssignment(assignmentToEdit);
+          }
         } else {
-            const updatedAssignment = {
-                ...assignment,
-                course: courseId ?? "",
-            };
-            dispatch(updateAssignment(assignment));
-            navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+          // new ass
+          if (assignment._id !== null) {
+            setAssignment({
+              _id: null,
+              title: "",
+              description: "",
+              toalPoints: 100,
+              dueDate: "",
+              course: courseId,
+            });
+          }
         }
-        
-    };
+      }, [assignmentId, assignments, courseId, assignment._id]);
 
-    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    // const [isNewAssignment, setIsNewAssignment] = useState(()=>{
+    //     const params = new URLSearchParams(window.location.search);
+    //     return params.get('id') === 'new';
+    // });
+
+
+    // const handleSave = () => {
+    //     try {
+    //         if(assignmentId === "new") {
+    //             const newId = new Date().getTime().toString();
+    //             const newAssignment = {
+    //                 ...assignment, 
+    //                 _id: newId,
+    //                 course: courseId,
+    //             };
+    //             const response = await client.createAssignment(courseId, newAssignment);
+    //             dispatch(addAssignment(response));
+    //             navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+    //         } else {
+    //             const updatedAssignment = {
+    //                 ...assignment,
+    //                 course: courseId,
+    //             };
+    //             const response = await client.updateAssignment(updatedAssignment);
+    //             dispatch(updateAssignment(response));
+    //             navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+    //         }
+
+    //     } catch(error){
+    //         console.error("Error saving assignment:", error);
+    //     }
+        
+    // };
+
+
+    const handleSave = () => {
+        console.log("Saving assignmentDetails:", assignment);
+    
+        const saveOperation =
+          assignmentId === "new"
+            ? client.createAssignment(courseId, assignment) // Create a new assignment
+            : client.updateAssignment(assignment); // Update existing assignment
+    
+        saveOperation
+          .then(() => {
+            // After a successful operation, navigate back to the list of assignments
+            navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+          })
+          .catch((error) => {
+            // Log any errors encountered during the save operation
+            console.error("Error saving assignment:", error);
+          });
+      };
+
+    const handleCancel = () => {
+        navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+    }
+
+    
+
+    const handleTitleChange = ((e) => {
         setAssignment({
             ...assignment,
             title: e.target.value,
         });
-    };
+    });
 
-    const handleDecriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleDecriptionChange = ((e) => {
         setAssignment({
             ...assignment,
             description: e.target.value,
         });
-    };
+    });
 
-    const handleDueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleDueChange = ((e) => {
         setAssignment({
             ...assignment,
             due: e.target.value,
         });
-    };
+    });
 
-    const handleTotalPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleTotalPointsChange = ((e) => {
         setAssignment({
             ...assignment,
             totalPoints: parseInt(e.target.value),
         });
-    };
+    });
 
 
     return (
@@ -122,12 +181,12 @@ function AssignmentEditor() {
                 <input 
                     id = "assignmentTitle"
                     className="form-control mb-2"
-                    value={newAssignment ? "" : assignment.title} 
+                    value={assignment.title} 
                     onChange={handleTitleChange} />
                 <textarea 
                     className="form-control mt-4 pb-2 pt-2" 
                     rows={4}
-                    value={newAssignment ? "" : assignment.description}
+                    value={assignment.description}
                     onChange = {handleDecriptionChange} ></textarea>
             </div>
             <div className="container">
@@ -142,7 +201,7 @@ function AssignmentEditor() {
                                     id="points" 
                                     min="0" 
                                     max="100" 
-                                    value={newAssignment ? "" : assignment.totalPoints}
+                                    value={assignment.totalPoints}
                                     onChange = {handleTotalPointsChange} />
                             </div>
                         </div>
@@ -251,9 +310,9 @@ function AssignmentEditor() {
                         <input type="checkbox" className="me-1" />Notify users that this content has changed
                     </label>
                     <div>
-                        <Link to={`/Kanbas/Courses/${courseId}/Assignments`} className="btn btn-secondary btn-outline-dark btn-lg btn-light me-2">
+                        <button type="button" onClick={handleCancel} className="btn btn-secondary btn-outline-dark btn-lg btn-light me-2">
                             Cancel
-                        </Link>
+                        </button>
 
                         <button type="button" onClick={handleSave} className="btn btn-primary btn-lg btn-danger ">
                             Save

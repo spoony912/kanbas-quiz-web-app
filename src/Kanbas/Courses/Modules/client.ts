@@ -4,7 +4,7 @@ const MODULES_API = "http://localhost:4000/api/modules";
 
 export const findModulesForCourse = async (courseId: string) => {
     const response = await axios.get(`${COURSES_API}/${courseId}/modules`);
-    return response.data;
+    return response.data; 
 };
 
 export const createModule = async(courseId:string, module:any) =>{

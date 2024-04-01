@@ -1,41 +1,53 @@
-import React, {useState} from "react";
-import { FaCheckCircle, FaEllipsisV, FaPlus, FaPlusCircle } from "react-icons/fa";
+import React, {useState, useEffect} from "react";
+import { FaCheckCircle, FaEllipsisV, FaPlusCircle } from "react-icons/fa";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import "../index.css"
-import { HiEllipsisVertical, HiPlus } from "react-icons/hi2";
-import { deleteAssignment } from "./assignmentsReducer";
+import { HiEllipsisVertical} from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
 import { KanbasState } from "../../store";
+import * as client from "./client";
+import { addAssignment, updateAssignment, deleteAssignment, setAssignments, selectAssignment } from "./assignmentsReducer";
 
-
-// ------- interface
-interface Assignment {
-    _id: string;
-    title: string;
-    description: string;
-    due: string;
-    totalPoints: number;
-    course: string;
-}
 
 function Assignments() {
-    const {courseId} = useParams();
+    const {courseId, assignmentId} = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const assignments = useSelector((state:KanbasState) => state.assignmentsReducer.assignments);
+    const assignmentList = useSelector((state) => state.assignmentsReducer.assignments.filter((each) => each.course === courseId));
+    const assignment = useSelector((state) => state.assignmentsReducer.assignment);
 
-    const assignmentList = assignments.filter( (assignment) => assignment.course === courseId);
+    useEffect(()=>{
+      client.findAssignmentsForCourse(courseId)
+      .then( (assignments) => dispatch(setAssignments(assignments)));
+    
+    },[courseId, dispatch]);
 
-    const AddAssignment = () => {
-        navigate(`/Kanbas/Courses/${courseId}/Assignments/new`);
+    // const handleAddAssignment = () => {
+    //   navigate(`/Kanbas/Courses/${courseId}/Assignments/new`);
+    // };
+
+    const handleAddAssignment = () => {
+      addAssignment(courseId, assignment).then((assignment) => {
+        dispatch(addAssignment(assignment));
+      });
     };
 
-    const DeleteAssignment = (assignmentId: string) => {
-      if (window.confirm("Are you sure you want to delete this assignment?")) {
-        dispatch(deleteAssignment(assignmentId));
-      }
-    }
+    const handleDeleteAssignment = (assignmentId) => {
+        client
+          .deleteAssignment(assignmentId)
+          .then(() => {
+            dispatch(deleteAssignment(assignmentId));
+          })
+          .catch((error) => {
+            console.error("Failed to delete assignment:", error);
+          });
+    };
 
+    const navigateToAssignmentEditor = () => {
+      navigate(`/Kanbas/Courses/${courseId}/Assignments/new`);
+    };
+
+  
     return(
         <>
             
@@ -49,7 +61,7 @@ function Assignments() {
                         </form>
                         <div className="float-end">
                             <button type="button" className="btn btn-outline-dark btn-light me-1"> + Group</button>
-                            <button type="button" className="btn btn-danger me-1" onClick = {AddAssignment}> + Assignment</button>
+                            <button type="button" className="btn btn-danger me-1" onClick = {navigateToAssignmentEditor}> + Assignment</button>
                             <button type="button" className="btn btn-outline-dark btn-light me-1">
                                  <HiEllipsisVertical />
                             </button>
@@ -63,7 +75,7 @@ function Assignments() {
                   <div >
                     <FaEllipsisV className="me-2" /> ASSIGNMENTS
                     <span className="float-end">
-                      {/* <FaCheckCircle className="text-success" /> */}
+                      <FaCheckCircle className="text-success" />
                       <span className="wd-eclipse ms-2">
                             40% of Total
                       </span>
@@ -79,10 +91,10 @@ function Assignments() {
                           <FaCheckCircle className="text-success" /><FaEllipsisV className="ms-2" /></span>
                           <hr/>
                           <span className="wd-smalltext">
-                              Due: {assignment.due} | Points: {assignment.totalPoints}
+                              Due: {assignment.due} | Total Points: {assignment.totalPoints}
                           </span>
                           <button type="button" className="btn btn-danger float-end me-1" onClick={ () => {
-                            DeleteAssignment(assignment._id);
+                            handleDeleteAssignment(assignment._id);
                           }}>Delete</button>
                       </li>))}
                   </ul>

@@ -10,8 +10,10 @@ import Grades from "./Grades";
 import "./index.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import * as client from "../Courses/client";
 import { FaBars, FaCaretDown, FaTimes,FaTachometerAlt, FaRegUserCircle, FaBook, FaRegCalendarAlt, FaInbox, FaHistory, FaLaptop, FaArrowAltCircleRight, FaQuestionCircle} from "react-icons/fa";
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 
 
 function Courses() {
@@ -21,9 +23,10 @@ function Courses() {
     const currentPage = location.pathname.split("/").pop();
 
     const [course, setCourse] = useState<any>({_id:""});
+
     const findCourseById = async(courseId?: string)=>{
-        const response = await axios.get(`${COURSES_API}/${courseId}`);
-        setCourse(response.data);
+        const course= await client.fetchCourseById(courseId);
+        setCourse(course);
     };
 
     useEffect( ()=>{
