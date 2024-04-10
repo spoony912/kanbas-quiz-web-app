@@ -13,7 +13,6 @@ export interface User { _id: string; username: string; password: string; role: s
   };
 
 export const findAllUsers= async () => {
-  // const response = await axiosWithCredentials.get("/users");
   const response = await axios.get(`${USERS_API}`);
   return response.data;
 };
