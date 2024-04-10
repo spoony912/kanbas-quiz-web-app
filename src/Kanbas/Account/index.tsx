@@ -1,17 +1,20 @@
-import {Navigate, Route, Routes} from "react-router";
-import RegisterScreen from "../Users/register";
-import Profile from "../Users/profile";
-
+import Signin from "../../Users/Signin";
+import {Routes, Route, Navigate} from "react-router-dom";
+import Profile from "../../Users/Profile";
+import RegisterScreen from "../../Users/register";
+import UserTable from "../../Users/Table";
 function Account() {
     return (
         <div className = "container-fluid">
-            <h1>Account</h1>
+
             <Routes>
-                <Route path = "/register" element = {<RegisterScreen/>}/>
-                <Route path = "/profile" element = {<Profile/>}/>
-                <Route path = "/" element = {<Navigate to = "register"/>}/>
+                <Route path = "/Signin" element = {<Signin/>}/>
+                <Route path = "/Profile" element = {<Profile/>}/>
+                <Route path = "/Register" element = {<RegisterScreen/>}/>
+                <Route path = "/Admin/Users" element = {<UserTable/>}/>
+                <Route path = "/" element = {<Navigate to = "/Kanbas/Account/Signin"/>}/>
             </Routes>
-        
+         
         
         
         </div>
