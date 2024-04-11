@@ -2,6 +2,7 @@
 // import Nav from "../Nav";
 // 最左边的-----------------------------------------------------------------------------//
 import KanbasNavigation from "./Navigation";
+import Account from "./Account";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./Dashboard";
 import Courses from "./Courses";
@@ -22,9 +23,10 @@ interface Course {
   endDate: string;
   image?: string; // image is optional
 }
-const API_BASE = process.env.REACT_APP_API_BASE;
+// const API_BASE = process.env.REACT_APP_API_BASE;
+// const BASE_API = process.env.REACT_APP_BASE_API_URL;
+
 function Kanbas() {
-  // define the style for the conatiner, so no need to import ./Navigation/index.css
   const containerStyle: React.CSSProperties = {
     display: "flex",
     height: "100vh",
@@ -47,7 +49,9 @@ function Kanbas() {
   // const COURSES_API =
   //   "https://kanbas-node-server-app-pd28.onrender.com/api/courses ";
   // 3
-  const COURSES_API = `${API_BASE}/api/courses`;
+  // const BASE_API = process.env.REACT_APP_API_BASE;
+  const BASE_API = process.env.REACT_APP_BASE_API_URL;
+  const COURSES_API = `${BASE_API}/api/courses`;
   const findAllCourses = async () => {
     const response = await axios.get(COURSES_API);
     setCourses(response.data);
@@ -56,45 +60,17 @@ function Kanbas() {
     findAllCourses();
   }, []);
 
-  // const addNewCourse = () => {
-  //   setCourses([
-  //     ...courses,
-  //     {
-  //       ...course,
-  //       _id: new Date().getTime().toString(),
-  //       image: "reactjs.jpg",
-  //     },
-  //   ]);
-  // };
-
   // new addNewCourse
   const addNewCourse = async () => {
     const response = await axios.post(COURSES_API, course);
     setCourses([...courses, response.data]);
   };
 
-  // // delete course func
-  // const deleteCourse = (courseId: string) => {
-  //   setCourses(courses.filter((course) => course._id !== courseId));
-  // };
-
   // new deleteCourse
   const deleteCourse = async (courseId: string) => {
     const response = await axios.delete(`${COURSES_API}/${courseId}`);
     setCourses(courses.filter((c) => c._id !== courseId));
   };
-  // // update course func
-  // const updateCourse = () => {
-  //   setCourses(
-  //     courses.map((c) => {
-  //       if (c._id === course._id) {
-  //         return course;
-  //       } else {
-  //         return c;
-  //       }
-  //     })
-  //   );
-  // };
 
   // new updateCourse
   const updateCourse = async () => {
@@ -118,8 +94,8 @@ function Kanbas() {
 
         <div style={{ flexGrow: 1 }}>
           <Routes>
+            <Route path="/Account/*" element={<Account />} />
             <Route path="/" element={<Navigate to="Dashboard" />} />
-            <Route path="Account" element={<h1>Account</h1>} />
             <Route
               path="Dashboard"
               element={
