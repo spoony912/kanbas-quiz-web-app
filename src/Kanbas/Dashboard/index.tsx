@@ -2,9 +2,6 @@ import React, {useState, useEffect} from "react";
 import { Link } from "react-router-dom";
 import * as client from "../Courses/client";
 
-// function Dashboard( 
-//   {courses, course, setCourse, addNewCourse, deleteCourse, updateCourse}:any
-//  ) {
 function Dashboard() {
   const [courses, setCourses] = useState([]);
   const [course, setCourse] = useState({} as any);
