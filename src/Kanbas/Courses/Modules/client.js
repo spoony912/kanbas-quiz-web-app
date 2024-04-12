@@ -8,7 +8,9 @@ import axios from "axios";
 // const MODULES_API =
 //   "https://kanbas-node-server-app-pd28.onrender.com/api/modules ";
 // 3
-const API_BASE = process.env.REACT_APP_API_BASE;
+// const API_BASE = process.env.REACT_APP_API_BASE;
+const API_BASE = process.env.REACT_APP_BASE_API_URL;
+
 const COURSES_API = `${API_BASE}/api/courses`;
 const MODULES_API = `${API_BASE}/api/modules`;
 

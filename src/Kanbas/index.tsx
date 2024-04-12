@@ -50,7 +50,7 @@ function Kanbas() {
   //   "https://kanbas-node-server-app-pd28.onrender.com/api/courses ";
   // 3
   // const BASE_API = process.env.REACT_APP_API_BASE;
-  const BASE_API = process.env.REACT_APP_BASE_API_URL;
+  const BASE_API = process.env.REACT_APP_BASE_API_URL; //REACT_APP_BASE_API_URL
   const COURSES_API = `${BASE_API}/api/courses`;
   const findAllCourses = async () => {
     const response = await axios.get(COURSES_API);
