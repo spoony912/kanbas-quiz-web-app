@@ -159,13 +159,18 @@ function Grades() {
                     );
                     return (
                       <td key={assignment._id}>
-                      <input
-                        defaultValue={grade?.grade || ""}
-                        type="number"
-                        placeholder="No Grade"
-                        style={{ width: "100%", border: "none", textAlign: "center" }}
-                      />
-                    </td>                    );
+                        <input
+                          defaultValue={grade?.grade || ""}
+                          type="number"
+                          placeholder="No Grade"
+                          style={{
+                            width: "100%",
+                            border: "none",
+                            textAlign: "center",
+                          }}
+                        />
+                      </td>
+                    );
                   })}
                 </tr>
               );
