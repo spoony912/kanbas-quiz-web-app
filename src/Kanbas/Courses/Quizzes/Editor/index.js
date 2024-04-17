@@ -11,8 +11,6 @@ function QuizzesDetails() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // const quizzes = useSelector((state)=>state.quizzesReducer.quizzes.filter((each)=>each.course === courseId));
-
   // const [quiz, setQuiz] = useState(
   //     {
   //         _id: null,
@@ -127,19 +125,19 @@ function QuizzesDetails() {
       {/* ------------Tab------------------- */}
       <div>
         <nav class="nav nav-tabs mt-2">
-          <a
+          <Link
             class="nav-link active"
-            href={`/Kanbas/Courses/${courseId}/Quizzes/Details`}
+            to={`/Kanbas/Courses/${courseId}/Quizzes/Details`}
           >
             Details
-          </a>
-          <a
+          </Link>
+          <Link
             class="nav-link"
             style={{ color: "red" }}
-            href={`/Kanbas/Courses/${courseId}/Quizzes/Questions`}
+            to={`/Kanbas/Courses/${courseId}/Quizzes/Questions`}
           >
             Questions
-          </a>
+          </Link>
         </nav>
         <br />
       </div>

@@ -1,11 +1,10 @@
-import { FaMagnifyingGlass } from "react-icons/fa6";
 import React, { useState, useEffect, Component } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { CKEditor } from "@ckeditor/ckeditor5-react"; // rich text editor
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic"; // rich text editor
 import { BsThreeDots } from "react-icons/bs"; // three dots
+
 export default function MultipleChoiceQuestion() {
-  //************************************* MC quiz start **************************************
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [text, setText] = useState("");
@@ -32,22 +31,20 @@ export default function MultipleChoiceQuestion() {
     );
     setQuestion({ ...question, choices: newChoices });
   };
-  const handleSave = () => {};
-  const handleCancel = () => navigate(`/Kanbas/Courses/${courseId}/Quizzes`);
-
-  //************************************* MC quiz end **************************************
-
+  const handleSave = () => {
+    navigate(`/Kanbas/Courses/${courseId}/Quizzes/Questions`);
+  };
+  const handleCancel = () =>
+    navigate(`/Kanbas/Courses/${courseId}/Quizzes/Questions`);
   return (
     <div
       className="mt-3"
       style={{
-        display: "flex",
         justifyContent: "flex-end",
         alignItems: "center",
       }}
     >
       <h1>Multiple Choice Quiz</h1>
-      {/************************************* MC quiz start **************************************/}
       <div
         className="mt-3"
         style={{
@@ -96,7 +93,7 @@ export default function MultipleChoiceQuestion() {
       </p>
       <h4>Question:</h4>
       <br />
-
+      {/* rich text editor */}
       <div className="editor mb-5">
         <CKEditor
           editor={ClassicEditor}
@@ -110,6 +107,7 @@ export default function MultipleChoiceQuestion() {
           }}
         />
       </div>
+
       {/* answer part */}
       <div>
         <h4>Answers:</h4>
@@ -126,31 +124,6 @@ export default function MultipleChoiceQuestion() {
           </p>
           <input placeholder="correct answers" className="form-control" />
         </div>
-        {/* possible answer */}
-        {/* <div className="mb-2">
-          <p style={{ color: "red" }}>
-            Possible Answer:
-            <button
-              className="btn btn-light"
-              style={{ border: "none", marginLeft: "10px" }}
-            >
-              edit
-            </button>
-            <button
-              className="btn btn-light"
-              style={{ border: "none", marginLeft: "10px" }}
-            >
-              delete
-            </button>
-            <button
-              className="btn btn-light"
-              style={{ border: "none", marginLeft: "10px" }}
-            >
-              <BsThreeDots size={24} style={{ color: "#333" }} />
-            </button>
-          </p>
-          <input placeholder="possible answers" className="form-control" />
-        </div> */}
 
         {/* button: add another answer */}
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -190,29 +163,19 @@ export default function MultipleChoiceQuestion() {
           </div>
         ))}
       </div>
-      {/* save and cancel --- return to previous page*/}
-      <button
-        className="btn btn-primary"
-        style={{ marginRight: "10px" }}
-        onClick={handleCancel}
-      >
-        Cancel
-      </button>
-      <button className="btn btn-danger" onClick={handleSave}>
-        Update Question
-      </button>
-      {/************************************* MC quiz end **************************************/}
-      <input
-        placeholder="Question Title"
-        className="form-control mb-2"
-        value={question.title}
-        onChange={(e) =>
-          setQuestion({
-            ...question,
-            title: e.target.value,
-          })
-        }
-      />
+      {/* save and cancel --- return to previous page */}
+      <div className="mt-5">
+        <button
+          className="btn btn-primary"
+          style={{ marginRight: "10px" }}
+          onClick={handleCancel}
+        >
+          Cancel
+        </button>
+        <button className="btn btn-danger" onClick={handleSave}>
+          Update Question
+        </button>
+      </div>
     </div>
   );
 }
