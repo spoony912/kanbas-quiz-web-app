@@ -1,76 +1,242 @@
-import React from "react";
-import "./index.css";
+import { FaBan, FaCheckCircle, FaEllipsisV, FaPencilAlt } from "react-icons/fa";
+import { useParams, useNavigate } from "react-router-dom";
+import "../index.css";
+import { useDispatch, useSelector } from "react-redux";
+import { KanbasState } from "../../../store";
+import { useEffect } from "react";
+// import { setQuiz, updateQuiz } from "../quizzesReducer";
+import * as client from "../client";
 
 function QuizDetails() {
-  const quizInfo = {
-    title: "Q1 - HTML",
-    quizType: "Graded Quiz",
-    points: 29,
-    assignmentGroup: "QUIZZES",
-    shuffleAnswers: "No",
-    timeLimit: "20 Minutes",
-    multipleAttempts: "No",
-    showCorrectAnswers: "Immediately",
-    asscessCode: "",
-    oneQuestionAtATime: "Yes",
-    webcamRequired: "No",
-    lockQuestionsAfterAnswering: "No",
-    dueDate: "Sep 21 at 1pm",
-    availableDate: "Sep 21 at 11:40am",
-    untilDate: "Sep 21 at 1pm",
+  const { quizId } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { courseId } = useParams();
+
+  function formatDate(inputDateString: string): string {
+    // Create a new Date object using the input date string
+    const date: Date = new Date(inputDateString);
+
+    // Define months array for formatting
+    const months: string[] = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    // Extract month, day, and year from the date object
+    const month: string = months[date.getUTCMonth()];
+    const day: number = date.getUTCDate();
+    const year: number = date.getUTCFullYear();
+
+    // Format the date string
+    const formattedDateString: string = `${month} ${day}, ${year}`;
+
+    return formattedDateString;
+  }
+  const dummyQuiz = useSelector(
+    (state: KanbasState) => state.quizzesReducer.dummyQuiz
+  );
+
+  const handlePublish = (quiz: any) => {
+    dispatch(setQuiz({ ...quiz, isPublished: !quiz.isPublished }));
+    quiz = { ...quiz, isPublished: !quiz.isPublished };
+    client.updateQuiz(quiz).then(() => {
+      dispatch(updateQuiz(quiz));
+    });
   };
+
+  useEffect(() => {
+    if (quizId !== "new") {
+      client.findQuizByID(quizId).then((quiz) => {
+        console.log("quiz", quiz);
+        dispatch(setQuiz(quiz));
+      });
+    } else {
+      dispatch(setQuiz(dummyQuiz));
+    }
+  }, [dispatch, dummyQuiz, quizId]);
+  const quiz = useSelector((state: KanbasState) => state.quizzesReducer.quiz);
+
   return (
-    <div className="quiz-details-container">
-      <h1 className="quiz-title">{quizInfo.title}</h1>
-      <div className="quiz-detail">
-        <strong>Quiz Type:</strong> {quizInfo.quizType}
+    <div style={{ marginRight: 55 }}>
+      <div className="d-flex justify-content-end">
+        <button
+          type="button"
+          onClick={() => handlePublish(quiz)}
+          style={
+            !quiz.isPublished
+              ? { background: "rgb(2, 128, 2)" }
+              : { background: "rgba(200, 19, 19)" }
+          }
+          className=" btn btn-light"
+        >
+          {quiz.isPublished ? (
+            <FaBan style={{ color: "white" }} className="fas fa-ban" />
+          ) : (
+            <FaCheckCircle
+              style={{ color: "white" }}
+              className="fas fa-check-circle"
+            />
+          )}
+
+          <span style={{ color: "white" }}>
+            <b> {quiz.isPublished ? "Unpublish" : "Publish"} </b>
+          </span>
+        </button>{" "}
+        &nbsp;&nbsp;
+        <button
+          type="button"
+          className="btn wd-module-button"
+          onClick={() => {
+            // Handle Preview action
+            navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quiz._id}/Preview`);
+          }}
+        >
+          Preview
+        </button>{" "}
+        &nbsp;&nbsp;
+        <button
+          type="button"
+          className="btn wd-module-button "
+          onClick={() => {
+            // Handle Edit action
+            navigate(
+              `/Kanbas/Courses/${courseId}/Quizzes/${quiz._id}/edit/DetailsEditor`
+            );
+          }}
+        >
+          {" "}
+          <FaPencilAlt
+            style={{ color: "grey" }}
+            className="fas fa-check-circle button-color"
+          />{" "}
+          Edit{" "}
+        </button>{" "}
+        &nbsp;&nbsp;
+        <button type="button" className="btn wd-module-button ">
+          {" "}
+          &nbsp;&nbsp;
+          <FaEllipsisV className="fas fa-ellipsis-v black-color" />
+        </button>
       </div>
-      <div className="quiz-detail">
-        <strong>Points:</strong> {quizInfo.points}
-      </div>
-      <div className="quiz-detail">
-        <strong>Assignment Group:</strong> {quizInfo.assignmentGroup}
-      </div>
-      <div className="quiz-detail">
-        <strong>Shuffle Answers:</strong> {quizInfo.shuffleAnswers}
-      </div>
-      <div className="quiz-detail">
-        <strong>Time Limit:</strong> {quizInfo.timeLimit}
-      </div>
-      <div className="quiz-detail">
-        <strong>Multiple Attempts:</strong> {quizInfo.multipleAttempts}
-      </div>
-      <div className="quiz-detail">
-        <strong>Show Correct Answers:</strong> {quizInfo.showCorrectAnswers}
-      </div>
-      <div className="quiz-detail">
-        <strong>One Question at a Time:</strong> {quizInfo.oneQuestionAtATime}
-      </div>
-      <div className="quiz-detail">
-        <strong>Webcam Required:</strong> {quizInfo.webcamRequired}
-      </div>
-      <div className="quiz-detail">
-        <strong>Lock Questions After Answering:</strong>{" "}
-        {quizInfo.lockQuestionsAfterAnswering}
-      </div>
-      <div className="quiz-detail">
-        <strong>Due:</strong> {quizInfo.dueDate}
-      </div>
-      <div className="quiz-detail">
-        <strong>For:</strong> Everyone
-      </div>
-      <div className="quiz-detail">
-        <strong>Available from:</strong> {quizInfo.availableDate}
-      </div>
-      <div className="quiz-detail">
-        <strong>Until:</strong> {quizInfo.untilDate}
-      </div>
-      <div className="quiz-controls">
-        <button className="control-button green">Publish</button>
-        <button className="control-button">Preview</button>
-        <button className="control-button">Edit</button>
+
+      <hr />
+      <div>
+        <h2>{quiz.title}</h2>
+        <br />
+        <div className="row">
+          <div className="col-3">
+            <strong className="float-right">Quiz Type</strong>
+          </div>
+          <div className="col-9">{quiz.quizType}</div>
+        </div>
+        <div className="row">
+          <div className="col-3">
+            <strong className="float-right">Points</strong>
+          </div>
+          <div className="col-9">{quiz.points}</div>
+        </div>
+        <div className="row">
+          <div className="col-3">
+            <strong className="float-right">Assignment Group</strong>
+          </div>
+          <div className="col-9">{quiz.assignmentGroup}</div>
+        </div>
+        <div className="row">
+          <div className="col-3">
+            <strong className="float-right">Shuffle Answers</strong>
+          </div>
+          <div className="col-9">{quiz.shuffleAnswers ? "Yes" : "No"}</div>
+        </div>
+        {quiz.isTimeLimited && (
+          <div className="row">
+            <div className="col-3">
+              <strong className="float-right">Time Limit</strong>
+            </div>
+            <div className="col-9">{quiz.timeLimit}</div>
+          </div>
+        )}
+
+        <div className="row">
+          <div className="col-3">
+            <strong className="float-right">Multiple Attempts</strong>
+          </div>
+          <div className="col-9">{quiz.multipleAttempts ? "Yes" : "No"}</div>
+        </div>
+        <div className="row">
+          <div className="col-3">
+            <strong className="float-right">Show Correct Answers</strong>
+          </div>
+          <div className="col-9">{quiz.showCorrectAnswers ? "Yes" : "No"}</div>
+        </div>
+
+        {quiz.showCorrectAnswers && (
+          <div className="row">
+            <div className="col-3">
+              <strong className="float-right">Correct Answers Date</strong>
+            </div>
+
+            <div className="col-9">{formatDate(quiz.correctAnswersDate)}</div>
+          </div>
+        )}
+
+        <div className="row">
+          <div className="col-3">
+            <strong className="float-right">One Question At A Time</strong>
+          </div>
+          <div className="col-9">{quiz.oneQuestionAtATime ? "Yes" : "No"}</div>
+        </div>
+        <div className="row">
+          <div className="col-3">
+            <strong className="float-right">Web Cam Required</strong>
+          </div>
+          <div className="col-9">{quiz.webcamRequired ? "Yes" : "No"}</div>
+        </div>
+        <div className="row">
+          <div className="col-3">
+            <strong className="float-right">
+              Lock Question After Answering
+            </strong>
+          </div>
+          <div className="col-9">
+            {quiz.lockQuestionsAfterAnswering ? "Yes" : "No"}
+          </div>
+        </div>
+        <br />
+        <br />
+        <br />
+
+        <table className="table ">
+          <thead>
+            <tr>
+              <th>Due</th>
+              <th>For</th>
+              <th>Available From</th>
+              <th>Until</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{formatDate(quiz.dueDate)}</td>
+              <td>{quiz.for}</td>
+              <td>{formatDate(quiz.availableDate)}</td>
+              <td>{formatDate(quiz.untilDate)}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
+
 export default QuizDetails;
