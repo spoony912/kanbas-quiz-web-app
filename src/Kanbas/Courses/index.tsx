@@ -11,6 +11,11 @@ import "./index.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import * as client from "../Courses/client";
+import QuizDetails from "./Quizzes/Details"
+import QuizQuestionMain from "./Quizzes/Editor/quizQuestionMain";
+import QuizList from "./Quizzes/List";
+import MultipleChoiceQuestion from "./Quizzes/Editor/MultipleChoiceQuestion";
+import QuizzDetailsEditor from "./Quizzes/Editor";
 import { FaBars, FaCaretDown, FaTimes,FaTachometerAlt, FaRegUserCircle, FaBook, FaRegCalendarAlt, FaInbox, FaHistory, FaLaptop, FaArrowAltCircleRight, FaQuestionCircle} from "react-icons/fa";
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -35,18 +40,6 @@ function Courses() {
       findCourseById(courseId);
     }, [courseId]);
 
-    // const fetchCourse = async(courseId?:string) => {
-    //     const course = await client.fetchCourseById(courseId);
-    //     setCourse(course);
-    // };
-
-    // useEffect( () => {
-    //     fetchCourse(courseId);
-    
-    // },[courseId]);
-
-
-    
 
     return(
         
@@ -223,7 +216,15 @@ function Courses() {
                                             <Route path="Zoom-Meetings" element={<h1>Zoom Meetings</h1>} />
                                             <Route path="Assignments" element={<Assignments />} />
                                             <Route path="Assignments/:assignmentId" element={<AssignmentEditor />} />
-                                            <Route path="Quizzes" element={<h1>Quizzes</h1>} />
+
+                                            {/* ----------------Quizzes Part---------------- */}
+                                            <Route path="Quizzes" element ={<QuizList/>}/>
+                                            <Route path="Quizzes/:quizId" element ={<QuizDetails/>}/>
+                                            <Route path="Quizzes/:quizId/Details" element ={<QuizzDetailsEditor/>}/>
+                                            <Route path="Quizzes/:quizId/Questions" element ={<QuizQuestionMain/>}/>
+                                            <Route path="Quizzes/:quizId/Questions/NewQuestions" element ={<MultipleChoiceQuestion/>}/>
+
+
                                             <Route path="Grades" element={<Grades />} />
                                             <Route path="Piazza" element={<h1>Piazza</h1>} />
                                             <Route path="People" element={<h1>People</h1>} />

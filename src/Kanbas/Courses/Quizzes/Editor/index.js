@@ -5,20 +5,29 @@ import { HiEllipsisVertical } from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
 import "./index.css";
 import {Editor} from "@tinymce/tinymce-react";
-function QuizzesDetails() {
+import * as client from "../client";
+import {addQuiz, deleteQuiz, updateQuiz, setQuiz, setQuizzes} from "../quizReducer"
+function QuizzDetailsEditor() {
 
 
-    const { courseId, assignmentId } = useParams();
+    const { courseId, quizId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // const quizzes = useSelector((state)=>state.quizzesReducer.quizzes.filter((each)=>each.course === courseId));
+    const quizzes = useSelector((state)=>state.quizzReducer.quizzes.filter((each)=>each.course === courseId));
+    const quiz = useSelector((state)=>state.quizzReducer.quiz);
+
+    useEffect (()=>{
+        client.findQuizzesForCourse(courseId)
+        .then((quizzes)=>dispatch(setQuizzes(quizzes)));
+    
+    },[courseId, dispatch])
 
 
     // const [quiz, setQuiz] = useState(
     //     {
     //         _id: null,
-    //         title: "",
+    //         name: "",
     //         description: "",
     //         due: "",
     //         totalPoints: 100,
@@ -27,21 +36,21 @@ function QuizzesDetails() {
     // );
 
     // useEffect(() => {
-    //     // existing ass
-    //     if (assignmentId && assignmentId !== "new") {
-    //       const assignmentToEdit = assignments.find(
-    //         (assn) => assn._id === assignmentId
+    //     // existing quiz
+    //     if (quizId && quizId !== "new") {
+    //       const quizToEdit = quizzes.find(
+    //         (quiz) => quiz._id === quizId
     //       );
-    //       // Only set if assignmentToEdit is different from the current state to avoid infinite loops
-    //       if (assignmentToEdit && assignmentToEdit._id !== assignment._id) {
-    //         setAssignment(assignmentToEdit);
+    //       // Only set if quizToEdit is different from the current state to avoid infinite loops
+    //       if (quizToEdit && quizToEdit._id !== quiz._id) {
+    //         setQuiz(quizToEdit);
     //       }
     //     } else {
-    //       // new ass
-    //       if (assignment._id !== null) {
-    //         setAssignment({
+    //       // new quiz
+    //       if (quiz._id !== null) {
+    //         setQuiz({
     //           _id: null,
-    //           title: "",
+    //           name: "",
     //           description: "",
     //           toalPoints: 100,
     //           dueDate: "",
@@ -49,30 +58,35 @@ function QuizzesDetails() {
     //         });
     //       }
     //     }
-    //   }, [assignmentId, assignments, courseId, assignment._id]);
+    //   }, [quizId, quizzes, courseId, quiz._id]);
 
     // const handleSave = () => {
-    //     console.log("Saving assignmentDetails:", assignment);
+    //     console.log("Saving quizDetails:", quiz);
     
     //     const saveOperation =
-    //       assignmentId === "new"
-    //         ? client.createAssignment(courseId, assignment) // Create a new assignment
-    //         : client.updateAssignment(assignment); // Update existing assignment
+    //       quizId === "new"
+    //         ? client.createQuiz(courseId, quiz) // Create a new quiz
+    //         : client.updateQuiz(quiz); // Update existing quiz
     
     //     saveOperation
     //       .then(() => {
     //         // After a successful operation, navigate back to the list of assignments
-    //         navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+    //         navigate(`/Kanbas/Courses/${courseId}/Quizzes`);
     //       })
     //       .catch((error) => {
     //         // Log any errors encountered during the save operation
-    //         console.error("Error saving assignment:", error);
+    //         console.error("Error saving quiz:", error);
     //       });
     //   };
 
     // const handleCancel = () => {
-    //     navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+    //     navigate(`/Kanbas/Courses/${courseId}/Quizzes`);
     // }
+
+    //todo
+    const handleSaveandPublish = () => {
+
+    }
 
     // const handleTitleChange = ((e) => {
     //     setAssignment({
@@ -133,8 +147,15 @@ function QuizzesDetails() {
             {/* ------------Tab------------------- */}
             <div>
                 <nav class = "nav nav-tabs mt-2">
-                    <a class = "nav-link active" href="`/Kanbas/Courses/${courseId}/Quizzes/Details`">Details</a>
-                    <a class = "nav-link" style={{color: 'red'}} href="`/Kanbas/Courses/${courseId}/Quizzes/Questions`">Questions</a>
+
+                    <Link class="nav-link active"
+                          to={`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Details`}>
+                        Details
+                    </Link>
+                    <Link  class="nav-link" style={{ color: "red" }}
+                      to={`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions`}>
+                      Questions
+                    </Link>
                 </nav>
                 <br/>
             </div>
@@ -189,6 +210,21 @@ function QuizzesDetails() {
                                     <option value="exams">EXAMS</option>
                                     <option value="project">PROJECT</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div className="mt-4 row">
+                            <label htmlFor="quiz-points" className="col-sm-4 col-form-label text-end">Points</label>
+                            <div className="col-sm-8">
+                                <input 
+                                    type="number" 
+                                    className="form-control" 
+                                    id="points" 
+                                    min="0" 
+                                    max="100" 
+                                    placeholder="100"
+                                    // value={assignment.totalPoints}
+                                    // onChange = {handleTotalPointsChange} 
+                                    />
                             </div>
                         </div>
                         <div className="mt-4 row">
@@ -304,4 +340,4 @@ function QuizzesDetails() {
         </>
             );
 }
-export default QuizzesDetails;
+export default QuizzDetailsEditor;
