@@ -7,11 +7,11 @@ import { HiOutlineBan } from "react-icons/hi";
 import { HiEllipsisVertical } from "react-icons/hi2";
 
 export default function QuizQuestionMain() {
-  const { courseId } = useParams();
+  const { courseId, quizId } = useParams();
   const navigate = useNavigate();
 
   const navigateToNewQuestion = () => {
-    navigate(`/Kanbas/Courses/${courseId}/Quizzes/NewQuestions`);
+    navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions/NewQuestions`);
   };
 
   return (
