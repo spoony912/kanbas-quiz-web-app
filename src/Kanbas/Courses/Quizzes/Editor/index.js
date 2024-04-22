@@ -1,6 +1,6 @@
 import React , {useEffect, useState} from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { HiOutlineBan } from "react-icons/hi";
+import { HiOutlineBan,HiCheckCircle } from "react-icons/hi";
 import { HiEllipsisVertical } from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
 import "./index.css";
@@ -25,6 +25,7 @@ function QuizzDetailsEditor() {
         webcamRequired: false,
         lockQuestionsAfterAnswering: false,
         oneQuestionAtATime: true,
+        published: false,
     });
 
     useEffect(()=>{
@@ -50,7 +51,8 @@ function QuizzDetailsEditor() {
                     lockQuestionsAfterAnswering: QuizDetails.lockQuestionsAfterAnswering !== undefined ? QuizDetails.lockQuestionsAfterAnswering : false,
                     dueDate: QuizDetails.dueDate,
                     availableDate: QuizDetails.availableDate,
-                    untilDate: QuizDetails.untilDate
+                    untilDate: QuizDetails.untilDate,
+                    published: QuizDetails.published!== undefined ? QuizDetails.published : false,
                 });
             
             })
@@ -86,7 +88,22 @@ function QuizzDetailsEditor() {
         }
     },[courseId, quizId, quiz._id])
 
-    // logic not sure
+    // quiz description part
+    const [editorConent, setEditorContent] = useState('')
+
+    useEffect(()=>{
+        setEditorContent(quiz.description);
+    },[quiz.description]);
+
+    const handleEditorChange = (newValue, editor) => {
+        setEditorContent(newValue);
+        setQuiz(quiz =>({
+            ...quiz,
+            description: newValue,
+        }));
+    };
+
+    //done
     const handleSave = () => {
         console.log("Saving quizDetails:", quiz);
     
@@ -111,9 +128,13 @@ function QuizzDetailsEditor() {
         navigate(`/Kanbas/Courses/${courseId}/Quizzes`);
     }
 
-    //todo: navigate to quiz list screen, save the quiz and publish the quiz
+    // done
     const handleSaveandPublish = () => {
         console.log("Saving quizDetails:", quiz);
+
+        if(!quiz.published) {
+            quiz.published = true;
+        }
     
         const saveOperation =
           quizId === "new"
@@ -135,13 +156,6 @@ function QuizzDetailsEditor() {
         setQuiz({
             ...quiz,
             title: e.target.value,
-        });
-    });
-
-    const handleDecriptionChange = ((e) => {
-        setQuiz({
-            ...quiz,
-            description: e.target.value,
         });
     });
 
@@ -252,10 +266,6 @@ function QuizzDetailsEditor() {
         });
     });
 
-    // Quiz text editor content
-    const[text, setText] = useState('');
-    const [value, setValue] = useState('<p>Quiz Instructions</p>');
-
     return (
         <>
             <div className="d-flex justify-content-end align-items-center me-4 ">
@@ -263,10 +273,15 @@ function QuizzDetailsEditor() {
                     Points {quiz.points}
                 </div>
 
-                {/* todo: publish status update */}
-                <div className="me-3" style={{ color: 'gray' }}>
-                    <HiOutlineBan /> Not Published
-                </div>
+                {quiz.published ? (
+                    <div className="me-3" style={{color:'green'}}>
+                        <HiCheckCircle /> Published
+                    </div>
+                ):(
+                    <div className="me-3" style={{ color: 'gray' }}>
+                        <HiOutlineBan /> Not Published
+                    </div>
+                )}
                 <button type="button" className="btn btn-outline-dark btn-light">
                     <HiEllipsisVertical />
                 </button>
@@ -300,13 +315,11 @@ function QuizzDetailsEditor() {
                 Quiz Instructions: <br/>
                 <Editor 
                     apiKey="81zmyhxc6njj4nq5jzzfeq4h70yojjr4aki254xmhai5dcwz"
-                    onEditorChange = {(newValue, editor)=>{
-                        setValue(newValue);
-                        setText(editor.getContent({format:'text'}));
-                    }}
-                    onInit = {(evt, editor)=>{
-                        setText(editor.getContent({format:'text'}));
-                    }}
+                    value ={editorConent}
+                    onEditorChange = {handleEditorChange}
+                    // onInit = {(evt, editor)=>{
+                    //     setText(editor.getContent({format:'text'}));
+                    // }}
                     init = {{
                         plugins:"a11ychecker advcode advlist advtable anchor autocorrect autolink autoresize autosave casechange charmap checklist code codesample directionality editimage emoticons export footnotes formatpainter fullscreen help image importcss inlinecss insertdatetime link linkchecker lists media mediaembed mentions mergetags nonbreaking pagebreak pageembed permanentpen powerpaste preview quickbars save searchreplace table tableofcontents template tinydrive tinymcespellchecker typography visualblocks visualchars wordcount"
                     }}
