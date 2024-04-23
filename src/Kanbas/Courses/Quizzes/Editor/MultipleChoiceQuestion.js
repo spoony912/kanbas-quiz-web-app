@@ -3,17 +3,42 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { CKEditor } from "@ckeditor/ckeditor5-react"; // rich text editor
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic"; // rich text editor
 import { BsThreeDots } from "react-icons/bs"; // three dots
+import * as client from "../client";
 
 export default function MultipleChoiceQuestion() {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const [text, setText] = useState("");
+  const [text, setText] = useState("How much is 1 + 1");
   const [question, setQuestion] = useState({
     title: "",
     description: "",
     point: 1,
     choices: [{ id: 1, text: "", isCorrect: true }],
   });
+  // filter quiz
+  const [quizType, setQuizType] = useState("Multiple Choice");
+  const fetchQuizByType = async (type) => {
+    const quiz = await client.findQuizByType(type);
+    setQuestion({ ...question, quiz });
+  };
+
+  useEffect(() => {
+    switch (quizType) {
+      case "Multiple Choice":
+        setText("How much is 1 + 1");
+        break;
+      case "True/False":
+        setText("1 + 1 = 2");
+        break;
+      case "Fill In Multiple Blanks":
+        setText("1 + 1 is _____");
+        break;
+      default:
+        setText("Enter your question here.");
+        break;
+    }
+  }, [quizType]);
+
   // add another answer
   const addChoice = () => {
     const newId = question.choices.length + 1;
@@ -31,11 +56,26 @@ export default function MultipleChoiceQuestion() {
     );
     setQuestion({ ...question, choices: newChoices });
   };
+  // button save
   const handleSave = () => {
-    navigate(`/Kanbas/Courses/${courseId}/Quizzes/Questions`);
+    const newQuestion = { ...question, description: text };
+    const saveOperation = question._id
+      ? client.updateQuiz(newQuestion)
+      : client.createQuiz(courseId, newQuestion);
+
+    saveOperation.then(() => {
+      navigate(`/Kanbas/Courses/${courseId}/Quizzes/Details/Questions`);
+    });
+    // .catch((error) => {
+    //   console.log("Error saving question:", error);
+    // });
   };
+  // button cancel
   const handleCancel = () =>
-    navigate(`/Kanbas/Courses/${courseId}/Quizzes/Questions`);
+    navigate(`/Kanbas/Courses/${courseId}/Quizzes/Details/Questions`);
+
+
+
   return (
     <div
       className="mt-3"
@@ -44,7 +84,7 @@ export default function MultipleChoiceQuestion() {
         alignItems: "center",
       }}
     >
-      <h1>Multiple Choice Quiz</h1>
+      <h1>{quizType} Quiz</h1>
       <div
         className="mt-3"
         style={{
@@ -66,11 +106,23 @@ export default function MultipleChoiceQuestion() {
             })
           }
         />
-        <select className="form-control" style={{ width: "200px" }}>
-          <option>Multiple Choice</option>
-          <option>True/False</option>
-          <option>Fill In Multiple Blanks</option>
+        <select
+          className="form-control"
+          style={{ width: "200px" }}
+          value={quizType}
+          onChange={(e) => {
+            const selectedType = e.target.value;
+            setQuizType(selectedType);
+            fetchQuizByType(selectedType);
+          }}
+        >
+          <option value="Multiple Choice">Multiple Choice</option>
+          <option value="True/False">True/False</option>
+          <option value="Fill In Multiple Blanks">
+            Fill In Multiple Blanks
+          </option>
         </select>
+
         <p>pts:</p>
         <input
           className="form-control"
@@ -98,9 +150,6 @@ export default function MultipleChoiceQuestion() {
         <CKEditor
           editor={ClassicEditor}
           data={text}
-          config={{
-            placeholder: "How much is 1 + 1?",
-          }}
           onChange={(event, editor) => {
             const data = editor.getData();
             setText(data);

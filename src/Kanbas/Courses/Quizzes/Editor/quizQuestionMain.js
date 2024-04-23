@@ -1,18 +1,42 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 // import { FaMagnifyingGlass } from "react-icons/fa";
 import { FaSearch } from "react-icons/fa";
-
 import { HiOutlineBan } from "react-icons/hi";
 import { HiEllipsisVertical } from "react-icons/hi2";
+import * as client from "../client";
 
 export default function QuizQuestionMain() {
-  const { courseId } = useParams();
+  const { courseId, quizId } = useParams();
   const navigate = useNavigate();
+  const [questions, setQuestions] = useState([]);
 
   const navigateToNewQuestion = () => {
-    navigate(`/Kanbas/Courses/${courseId}/Quizzes/NewQuestions`);
+    navigate(
+      `/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions/NewQuestions`
+    );
   };
+
+  // display new created question
+  // useEffect(() => {
+  //   const fetchQuestions = async () => {
+  //     const fetchedQuestions = await client.findQuizzesForCourse(courseId);
+  //     setQuestions(fetchedQuestions);
+  //   };
+
+  //   fetchQuestions();
+  // }, [courseId, quizId]);
+
+  useEffect(() => {
+    client
+      .findQuizzesForCourse(courseId)
+      .then((questions) => {
+        setQuestions(questions);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch questions:", error);
+      });
+  }, [courseId]);
 
   return (
     <>
@@ -69,6 +93,17 @@ export default function QuizQuestionMain() {
           </button>
         </div>
         {/* three buttons end */}
+      </div>
+
+      {/* display all new created questions */}
+      <div>
+        {questions.map((question) => (
+          <div key={question._id}>
+            <h3>{question.title}</h3>
+            <div dangerouslySetInnerHTML={{ __html: question.description }} />
+            {/* Render other parts of the question as needed */}
+          </div>
+        ))}
       </div>
     </>
   );
