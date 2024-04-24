@@ -1,109 +1,98 @@
 import React, { useEffect, useState } from "react";
-import { findQuizzesForCourse } from "../client"; // Ensure this path is correct
-import { useParams } from "react-router";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import "./index.css";
+import {
+  addQuiz,
+  deleteQuiz,
+  updateQuiz,
+  setQuiz,
+  setQuizzes,
+} from "../quizReducer";
+import { KanbasState } from "../../../store";
+import * as client from "../client";
 
-interface Quiz {
-  _id: string;
-  title: string;
-  points: number;
-  quiztype: string;
-  group: string;
-  shuffle: boolean;
-  time: number;
-  multiple_attempts: boolean;
-  show_correct: boolean;
-  show_correct_date: string;
-  code: string;
-  one_question: boolean;
-  webcam: boolean;
-  lock: boolean;
-  due_date: string;
-  start_date: string;
-  until_date: string;
-}
+function QuizDetails() {
+  const { courseId, quizId } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-const QuizDetails: React.FC = () => {
-  const { quizId } = useParams<{ quizId?: string }>();
-  const [quizInfo, setQuizInfo] = useState<Quiz | null>(null);
+  const navigateToQuizDetailsEditor = () => {
+    navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Details`);
+  };
+
+  const quiz = useSelector((state: KanbasState) => state.quizReducer.quiz);
 
   useEffect(() => {
-    if (!quizId) {
-      console.log("Quiz ID is not available");
-      return;
+    if (typeof courseId === "string") {
+      client
+        .findQuizzesForCourse(courseId)
+        .then((quizzes) => dispatch(setQuizzes(quizzes)));
     }
-
-    const fetchQuizDetails = async () => {
-      try {
-        const data = await findQuizzesForCourse(quizId);
-        setQuizInfo(data);
-      } catch (error) {
-        console.error("Failed to fetch quiz details:", error);
-      }
-    };
-
-    fetchQuizDetails();
-  }, [quizId]);
-
-  if (!quizInfo) {
-    return <div>Loading...</div>;
-  }
+  }, [courseId, dispatch]);
 
   return (
     <div className="quiz-details-container">
-      <h1 className="quiz-title">{quizInfo.title}</h1>
+      <div className="quiz-controls">
+        {quiz.published ? (
+          <button className="control-button green">Published</button>
+        ) : (
+          <button className="control-button gray">Unpublish</button>
+        )}
+        <button className="control-button">Preview</button>
+        <button
+          className="control-button"
+          onClick={navigateToQuizDetailsEditor}
+        >
+          Edit
+        </button>
+      </div>
+
+      <h1 className="quiz-title">{quiz.title}</h1>
       <div className="quiz-detail">
-        <strong>Quiz Type:</strong> {quizInfo.quiztype}
+        <strong>Quiz Type:</strong> {quiz.quizType}
       </div>
       <div className="quiz-detail">
-        <strong>Points:</strong> {quizInfo.points}
+        <strong>Points:</strong> {quiz.points}
       </div>
       <div className="quiz-detail">
-        <strong>Assignment Group:</strong> {quizInfo.group}
+        <strong>Assignment Group:</strong> {quiz.assignmentGroup}
       </div>
       <div className="quiz-detail">
-        <strong>Shuffle Answers:</strong> {quizInfo.shuffle ? "Yes" : "No"}
+        <strong>Shuffle Answers:</strong> {quiz.shuffleAnswers}
       </div>
       <div className="quiz-detail">
-        <strong>Time Limit:</strong> {quizInfo.time} Minutes
+        <strong>Time Limit:</strong> {quiz.timeLimit}
       </div>
       <div className="quiz-detail">
-        <strong>Multiple Attempts:</strong> {quizInfo.multiple_attempts}
+        <strong>Multiple Attempts:</strong> {quiz.multipleAttempts}
       </div>
       <div className="quiz-detail">
-        <strong>Show Correct Answers:</strong> {quizInfo.show_correct}
+        <strong>Show Correct Answers:</strong> {quiz.showCorrectAnswers}
       </div>
       <div className="quiz-detail">
-        <strong>Access Code:</strong> {quizInfo.code}
+        <strong>One Question at a Time:</strong> {quiz.oneQuestionAtATime}
       </div>
       <div className="quiz-detail">
-        <strong>One Question at a Time:</strong>{" "}
-        {quizInfo.one_question ? "Yes" : "No"}
-      </div>
-      <div className="quiz-detail">
-        <strong>Webcam Required:</strong> {quizInfo.webcam ? "No" : "Yes"}
+        <strong>Webcam Required:</strong> {quiz.webcamRequired}
       </div>
       <div className="quiz-detail">
         <strong>Lock Questions After Answering:</strong>{" "}
-        {quizInfo.lock ? "No" : "Yes"}
+        {quiz.lockQuestionsAfterAnswering}
       </div>
       <div className="quiz-detail">
-        <strong>Due Date</strong> {quizInfo.due_date}
+        <strong>Due:</strong> {quiz.dueDate}
       </div>
       <div className="quiz-detail">
-        <strong>Available Date:</strong> {quizInfo.start_date}
+        <strong>For:</strong> Everyone
       </div>
       <div className="quiz-detail">
-        <strong>Until Date:</strong> {quizInfo.until_date}
+        <strong>Available from:</strong> {quiz.availableDate}
       </div>
-
-      <div className="quiz-controls">
-        <button className="control-button green">Publish</button>
-        <button className="control-button">Preview</button>
-        <button className="control-button">Edit</button>
+      <div className="quiz-detail">
+        <strong>Until:</strong> {quiz.untilDate}
       </div>
     </div>
   );
-};
-
+}
 export default QuizDetails;
