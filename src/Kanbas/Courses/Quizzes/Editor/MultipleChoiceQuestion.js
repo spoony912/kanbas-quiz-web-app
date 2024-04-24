@@ -6,7 +6,7 @@ import { BsThreeDots } from "react-icons/bs"; // three dots
 import * as client from "../client";
 
 export default function MultipleChoiceQuestion() {
-  const { courseId } = useParams();
+  const { courseId, quizId } = useParams();
   const navigate = useNavigate();
   const [text, setText] = useState("How much is 1 + 1");
   const [question, setQuestion] = useState({
@@ -57,24 +57,46 @@ export default function MultipleChoiceQuestion() {
     setQuestion({ ...question, choices: newChoices });
   };
   // button save
-  const handleSave = () => {
-    const newQuestion = { ...question, description: text };
-    const saveOperation = question._id
-      ? client.updateQuiz(newQuestion)
-      : client.createQuiz(courseId, newQuestion);
+  // const handleSave = () => {
+  //   const newQuestion = { ...question, description: text };
+  //   // const saveOperation = question._id
+  //   //   ? client.updateQuiz(newQuestion)
+  //   //   : client.createQuiz(courseId, newQuestion);
 
-    saveOperation.then(() => {
-      navigate(`/Kanbas/Courses/${courseId}/Quizzes/Details/Questions`);
-    });
-    // .catch((error) => {
-    //   console.log("Error saving question:", error);
-    // });
+  //   // saveOperation.then(() => {
+  //   //   navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions`);
+  //   // });
+  //   // .catch((error) => {
+  //   //   console.log("Error saving question:", error);
+  //   // });
+  //   const saveOperation = client.createQuestion(courseId, quizId, newQuestion);
+  //   saveOperation.then(() => {
+  //     navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions`);
+  //   });
+  // };
+
+  const handleSave = async () => {
+    try {
+      const questionData = {
+        text: text, // The text from CKEditor
+        // add additional fields if necessary
+      };
+      const response = await client.createQuestion(
+        courseId,
+        quizId,
+        questionData
+      );
+      console.log("Question saved:", response);
+      // Additional handling like clearing the editor or showing success message
+    } catch (error) {
+      console.error("Failed to save question:", error);
+      // Error handling
+    }
+    navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions`);
   };
   // button cancel
   const handleCancel = () =>
-    navigate(`/Kanbas/Courses/${courseId}/Quizzes/Details/Questions`);
-
-
+    navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions`);
 
   return (
     <div

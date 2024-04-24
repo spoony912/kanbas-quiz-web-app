@@ -1,21 +1,38 @@
-import { FaMagnifyingGlass } from "react-icons/fa6";
-import React, { useState, useEffect, Component } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
-import { CKEditor } from "@ckeditor/ckeditor5-react"; // rich text editor
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic"; // rich text editor
-import { BsThreeDots } from "react-icons/bs"; // three dots
+import React from "react";
+import QuizList from "./List";
+import { FaGlasses } from "react-icons/fa";
 
-export default function QuizDetailAndQuestion() {
-  const { courseId } = useParams();
-  const navigate = useNavigate();
-
-  const navigateToNewQuestion = () => {
-    navigate(`/Kanbas/Courses/${courseId}/Quizzes/NewQuiz`);
-  };
-
+function Quizzes() {
   return (
     <div>
-      <h1>Quiz Detail And Question</h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <h3>Quizzes</h3>
+        <button
+          type="button"
+          className="btn btn-secondary btn-rounded"
+          style={{ marginLeft: "auto" }}
+        >
+          <FaGlasses /> Student View
+        </button>
+        <hr />
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button
+          style={{ width: "100px", marginTop: "10px", marginLeft: "auto" }}
+          className="btn btn-danger w-10"
+        >
+          + Quiz
+        </button>
+      </div>
+
+      <QuizList />
     </div>
   );
 }
+export default Quizzes;

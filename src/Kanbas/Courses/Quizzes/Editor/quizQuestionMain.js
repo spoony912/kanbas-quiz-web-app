@@ -29,14 +29,14 @@ export default function QuizQuestionMain() {
 
   useEffect(() => {
     client
-      .findQuizzesForCourse(courseId)
+      .fetchQuestions(courseId, quizId)
       .then((questions) => {
         setQuestions(questions);
       })
       .catch((error) => {
         console.error("Failed to fetch questions:", error);
       });
-  }, [courseId]);
+  }, [courseId, quizId]);
 
   return (
     <>
@@ -99,8 +99,8 @@ export default function QuizQuestionMain() {
       <div>
         {questions.map((question) => (
           <div key={question._id}>
-            <h3>{question.title}</h3>
-            <div dangerouslySetInnerHTML={{ __html: question.description }} />
+            {/* <h3>{question.title}</h3> */}
+            <div dangerouslySetInnerHTML={{ __html: question.text }} />
             {/* Render other parts of the question as needed */}
           </div>
         ))}

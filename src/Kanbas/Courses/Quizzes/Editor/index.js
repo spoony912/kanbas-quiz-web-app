@@ -1,118 +1,281 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams, Link, NavLink } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { HiOutlineBan } from "react-icons/hi";
 import { HiEllipsisVertical } from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
 import "./index.css";
 import { Editor } from "@tinymce/tinymce-react";
+import * as client from "../client";
+import { fetchQuizById } from "../client";
 
-function QuizzesDetails() {
-  const { courseId, assignmentId } = useParams();
+function QuizzDetailsEditor() {
+  const { courseId, quizId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // const [quiz, setQuiz] = useState(
-  //     {
-  //         _id: null,
-  //         title: "",
-  //         description: "",
-  //         due: "",
-  //         totalPoints: 100,
-  //         course: courseId,
-  //     }
-  // );
+  const [quiz, setQuiz] = useState({
+    quizType: "Graded Quiz",
+    assignmentGroup: "QUIZZES",
+    timeLimit: "20 Minutes",
+    isTimeLimitEnabled: true,
+    shuffleAnswers: true,
+    multipleAttempts: false,
+    showCorrectAnswers: "Immediately",
+    webcamRequired: false,
+    lockQuestionsAfterAnswering: false,
+    oneQuestionAtATime: true,
+  });
 
-  // useEffect(() => {
-  //     // existing ass
-  //     if (assignmentId && assignmentId !== "new") {
-  //       const assignmentToEdit = assignments.find(
-  //         (assn) => assn._id === assignmentId
-  //       );
-  //       // Only set if assignmentToEdit is different from the current state to avoid infinite loops
-  //       if (assignmentToEdit && assignmentToEdit._id !== assignment._id) {
-  //         setAssignment(assignmentToEdit);
-  //       }
-  //     } else {
-  //       // new ass
-  //       if (assignment._id !== null) {
-  //         setAssignment({
-  //           _id: null,
-  //           title: "",
-  //           description: "",
-  //           toalPoints: 100,
-  //           dueDate: "",
-  //           course: courseId,
-  //         });
-  //       }
-  //     }
-  //   }, [assignmentId, assignments, courseId, assignment._id]);
+  useEffect(() => {
+    if (quizId && quizId !== "new") {
+      fetchQuizById(courseId, quizId)
+        .then((QuizDetails) => {
+          setQuiz({
+            _id: QuizDetails._id,
+            description: QuizDetails.description,
+            course: QuizDetails.course,
+            title: QuizDetails.title,
+            quizType: QuizDetails.quizType || "Graded Quiz",
+            points: QuizDetails.points,
+            assignmentGroup: QuizDetails.assignmentGroup || "QUIZZES",
+            shuffleAnswers:
+              QuizDetails.shuffleAnswers !== undefined
+                ? QuizDetails.shuffleAnswers
+                : true,
+            timeLimit: QuizDetails.timeLimit,
+            isTimeLimitEnabled:
+              QuizDetails.isTimeLimitEnabled !== undefined
+                ? QuizDetails.isTimeLimitEnabled
+                : true,
+            multipleAttempts:
+              QuizDetails.multipleAttempts !== undefined
+                ? QuizDetails.multipleAttempts
+                : false,
+            showCorrectAnswers: QuizDetails.showCorrectAnswers || "Immediately",
+            accessCode: QuizDetails.accessCode,
+            oneQuestionAtATime:
+              QuizDetails.oneQuestionAtATime !== undefined
+                ? QuizDetails.oneQuestionAtATime
+                : true,
+            webcamRequired:
+              QuizDetails.webcamRequired !== undefined
+                ? QuizDetails.webcamRequired
+                : false,
+            lockQuestionsAfterAnswering:
+              QuizDetails.lockQuestionsAfterAnswering !== undefined
+                ? QuizDetails.lockQuestionsAfterAnswering
+                : false,
+            dueDate: QuizDetails.dueDate,
+            availableDate: QuizDetails.availableDate,
+            untilDate: QuizDetails.untilDate,
+          });
+        })
+        .catch((error) => {
+          console.error("Error fetching quiz:", error);
+        });
+    } else {
+      //quiz database id / _id ???
+      if (quiz._id !== null) {
+        setQuiz({
+          _id: quiz.length + 1,
+          description: "",
+          course: courseId,
+          title: "",
+          quizType: "Graded Quiz",
+          points: 100,
+          assignmentGroup: "QUIZZES",
+          shuffleAnswers: true,
+          timeLimit: "20 Minutes",
+          multipleAttempts: false,
+          showCorrectAnswers: "Immediately",
+          accessCode: "",
+          oneQuestionAtATime: true,
+          webcamRequired: false,
+          lockQuestionsAfterAnswering: false,
+          dueDate: "",
+          availableDate: "",
+          untilDate: "",
+        });
+      }
+    }
+  }, [courseId, quizId, quiz._id]);
 
-  // const handleSave = () => {
-  //     console.log("Saving assignmentDetails:", assignment);
+  // logic not sure
+  const handleSave = () => {
+    console.log("Saving quizDetails:", quiz);
 
-  //     const saveOperation =
-  //       assignmentId === "new"
-  //         ? client.createAssignment(courseId, assignment) // Create a new assignment
-  //         : client.updateAssignment(assignment); // Update existing assignment
+    const saveOperation =
+      quizId === "new"
+        ? client.createQuiz(courseId, quiz) // Create a new quiz
+        : client.updateQuizDetails(courseId, quizId, quiz); // Update existing quiz
 
-  //     saveOperation
-  //       .then(() => {
-  //         // After a successful operation, navigate back to the list of assignments
-  //         navigate(`/Kanbas/Courses/${courseId}/Assignments`);
-  //       })
-  //       .catch((error) => {
-  //         // Log any errors encountered during the save operation
-  //         console.error("Error saving assignment:", error);
-  //       });
-  //   };
+    saveOperation
+      .then(() => {
+        // After a successful operation, navigate back to details page
+        navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}`);
+      })
+      .catch((error) => {
+        // Log any errors encountered during the save operation
+        console.error("Error saving quiz:", error);
+      });
+  };
 
-  // const handleCancel = () => {
-  //     navigate(`/Kanbas/Courses/${courseId}/Assignments`);
-  // }
+  // done
+  const handleCancel = () => {
+    navigate(`/Kanbas/Courses/${courseId}/Quizzes`);
+  };
 
-  // const handleTitleChange = ((e) => {
-  //     setAssignment({
-  //         ...assignment,
-  //         title: e.target.value,
-  //     });
-  // });
+  //todo: navigate to quiz list screen, save the quiz and publish the quiz
+  const handleSaveandPublish = () => {
+    console.log("Saving quizDetails:", quiz);
 
-  // const handleDecriptionChange = ((e) => {
-  //     setAssignment({
-  //         ...assignment,
-  //         description: e.target.value,
-  //     });
-  // });
+    const saveOperation =
+      quizId === "new"
+        ? client.createQuiz(courseId, quiz) // Create a new quiz
+        : client.updateQuizDetails(courseId, quizId, quiz); // Update existing quiz details
 
-  // const handleDueChange = ((e) => {
-  //     setAssignment({
-  //         ...assignment,
-  //         due: e.target.value,
-  //     });
-  // });
+    saveOperation
+      .then(() => {
+        // After a successful operation, navigate back to the list of quizzes
+        navigate(`/Kanbas/Courses/${courseId}/Quizzes`);
+      })
+      .catch((error) => {
+        // Log any errors encountered during the save operation
+        console.error("Error saving quiz:", error);
+      });
+  };
 
-  // const handleTotalPointsChange = ((e) => {
-  //     setAssignment({
-  //         ...assignment,
-  //         totalPoints: parseInt(e.target.value),
-  //     });
-  // });
+  const handleTitleChange = (e) => {
+    setQuiz({
+      ...quiz,
+      title: e.target.value,
+    });
+  };
+
+  const handleDecriptionChange = (e) => {
+    setQuiz({
+      ...quiz,
+      description: e.target.value,
+    });
+  };
+
+  const handleQuizTypeChange = (e) => {
+    setQuiz({
+      ...quiz,
+      quizType: e.target.value,
+    });
+  };
+
+  const handleAssignmentGroupChange = (e) => {
+    setQuiz({
+      ...quiz,
+      assignmentGroup: e.target.value,
+    });
+  };
+
+  const handleToPointsChange = (e) => {
+    setQuiz({
+      ...quiz,
+      points: parseInt(e.target.value),
+    });
+  };
+
+  const handleTimeLimitChange = (e) => {
+    setQuiz({
+      ...quiz,
+      timeLimit: e.target.value,
+    });
+  };
+
+  const toogleTimeLimit = (e) => {
+    const isChecked = e.target.checked;
+    setQuiz({
+      ...quiz,
+      isTimeLimitEnabled: isChecked,
+      timeLimit: isChecked ? quiz.timeLimit : "",
+    });
+  };
+
+  const handleShuffleAnswersChange = (e) => {
+    setQuiz({
+      ...quiz,
+      shuffleAnswers: e.target.checked,
+    });
+  };
+
+  const handleMultipleAttemptsChange = (e) => {
+    setQuiz({
+      ...quiz,
+      multipleAttempts: e.target.checked,
+    });
+  };
+
+  const handleShowCorrectAnswerChange = (e) => {
+    setQuiz({
+      ...quiz,
+      showCorrectAnswers: e.target.value,
+    });
+  };
+
+  const handleOneQuestionAtATimeChange = (e) => {
+    setQuiz({
+      ...quiz,
+      oneQuestionAtATime: e.target.checked,
+    });
+  };
+
+  const handleWebcamRequiredChange = (e) => {
+    setQuiz({
+      ...quiz,
+      webcamRequired: e.target.checked,
+    });
+  };
+
+  const handleLockQuestionsAfterAnsweringChange = (e) => {
+    setQuiz({
+      ...quiz,
+      lockQuestionsAfterAnswering: e.target.checked,
+    });
+  };
+
+  const handleAccessCodeChange = (e) => {
+    setQuiz({
+      ...quiz,
+      accessCode: e.target.value,
+    });
+  };
+
+  const handleDueChange = (e) => {
+    setQuiz({
+      ...quiz,
+      dueDate: e.target.value,
+    });
+  };
+
+  const handleAvailableDueChange = (e) => {
+    setQuiz({
+      ...quiz,
+      availableDate: e.target.value,
+    });
+  };
+
+  const handleUntilDateChange = (e) => {
+    setQuiz({
+      ...quiz,
+      untilDate: e.target.value,
+    });
+  };
 
   // Quiz text editor content
   const [text, setText] = useState("");
   const [value, setValue] = useState("<p>Quiz Instructions</p>");
 
-  //access code
-  const [accessCode, setAccessCode] = useState("");
-
-  const handleAccessCodeChange = (e) => {
-    setAccessCode(e.target.value);
-  };
-
   return (
     <>
       <div className="d-flex justify-content-end align-items-center me-4 ">
-        <div className="me-3">Points 0</div>
+        <div className="me-3">Points {quiz.points}</div>
+
+        {/* todo: publish status update */}
         <div className="me-3" style={{ color: "gray" }}>
           <HiOutlineBan /> Not Published
         </div>
@@ -127,14 +290,14 @@ function QuizzesDetails() {
         <nav class="nav nav-tabs mt-2">
           <Link
             class="nav-link active"
-            to={`/Kanbas/Courses/${courseId}/Quizzes/Details`}
+            to={`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Details`}
           >
             Details
           </Link>
           <Link
             class="nav-link"
             style={{ color: "red" }}
-            to={`/Kanbas/Courses/${courseId}/Quizzes/Questions`}
+            to={`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions`}
           >
             Questions
           </Link>
@@ -143,14 +306,16 @@ function QuizzesDetails() {
       </div>
 
       <div>
+        {/* ------------Quiz title------------------- */}
         <input
           id="quizTitle"
           className="form-control mb-2"
           placeholder="Unnamed Quiz"
-          // value={quiz.title}
-          // onChange={handleTitleChange}
+          value={quiz.title}
+          onChange={handleTitleChange}
         />{" "}
         <br />
+        {/* ------------Quiz instructions editor------------------- */}
         Quiz Instructions: <br />
         <Editor
           apiKey="81zmyhxc6njj4nq5jzzfeq4h70yojjr4aki254xmhai5dcwz"
@@ -170,6 +335,7 @@ function QuizzesDetails() {
       <div className="container">
         <div className="d-flex justify-content-left">
           <div className="w-75">
+            {/* ----------Quiz Type---------------- */}
             <div className="mt-4 row">
               <label
                 htmlFor="quiz-type"
@@ -178,14 +344,20 @@ function QuizzesDetails() {
                 Quiz Type
               </label>
               <div className="col-sm-8">
-                <select className="form-select" id="quiz-type">
-                  <option selected>Graded Quiz</option>
+                <select
+                  className="form-select"
+                  id="quiz-type"
+                  value={quiz.quizType}
+                  onChange={handleQuizTypeChange}
+                >
+                  <option value="gradedQuiz">Graded Quiz</option>
                   <option value="practiceQuiz">Practice Quiz</option>
                   <option value="survey">Graded Survey</option>
                   <option value="ungradedSurvey">Ungraded Survey</option>
                 </select>
               </div>
             </div>
+            {/* ---------------Assignment Group-------------------- */}
             <div className="mt-4 row">
               <label
                 htmlFor="quiz-group"
@@ -194,56 +366,86 @@ function QuizzesDetails() {
                 Assignment Group
               </label>
               <div className="col-sm-8">
-                <select className="form-select" id="quiz-group">
-                  <option selected>QUIZZES</option>
+                <select
+                  className="form-select"
+                  id="quiz-group"
+                  value={quiz.assignmentGroup}
+                  onChange={handleAssignmentGroupChange}
+                >
+                  <option value="quizzes">QUIZZES</option>
                   <option value="assignments">ASSIGNMENTS</option>
                   <option value="exams">EXAMS</option>
                   <option value="project">PROJECT</option>
                 </select>
               </div>
             </div>
+            {/* -----------Points----------------- */}
+            <div className="mt-4 row">
+              <label
+                htmlFor="quiz-points"
+                className="col-sm-4 col-form-label text-end"
+              >
+                Points
+              </label>
+              <div className="col-sm-8">
+                <input
+                  type="number"
+                  className="form-control"
+                  id="points"
+                  min="0"
+                  max="100"
+                  placeholder="100"
+                  value={quiz.points}
+                  onChange={handleToPointsChange}
+                />
+              </div>
+            </div>
             <div className="mt-4 row">
               <div className="col-sm-4"></div>
               <div className="col-sm-8">
+                {/* --------------Options---------------- */}
                 <b>Options</b>
                 <div className="form-check mt-2">
                   <input
                     className="form-check-input"
                     type="checkbox"
                     id="shuffle-answer"
-                    checked
+                    checked={quiz.shuffleAnswers}
+                    onChange={handleShuffleAnswersChange}
                   />
                   <label className="form-check-label" htmlFor="shuffle-answer">
                     Shuffle Answers
                   </label>
                 </div>
+                {/* -------------Time Limit------------------ */}
                 <div className="form-check mt-4">
                   <input
                     className="form-check-input"
                     type="checkbox"
                     id="time-limit"
-                    checked
+                    checked={quiz.isTimeLimitEnabled || false}
+                    onChange={toogleTimeLimit}
                   />
                   <label className="form-check-label" htmlFor="time-limit">
-                    Time Limit
+                    Time Limit:
                   </label>
                   <input
                     className="time-input"
-                    type="number"
                     id="time-value"
-                    defaultValue={20}
+                    value={quiz.timeLimit || ""}
                     min={1}
+                    onChange={handleTimeLimitChange}
                   />
-                  <label className="form-check-label" htmlFor="time-value">
-                    Minutes
-                  </label>
                 </div>
+                {/* -------------Multiple Attempts------------------ */}
                 <div className="border p-1 mt-3">
                   <div className="mb-1 ">
                     <input
                       className="form-check-input"
                       type="checkbox"
                       id="multiple-attempt"
+                      checked={quiz.multipleAttempts}
+                      onChange={handleMultipleAttemptsChange}
                     />
                     <label
                       className="form-check-label"
@@ -253,22 +455,22 @@ function QuizzesDetails() {
                     </label>
                   </div>
                 </div>
+
                 <div className="form-check mt-2">
+                  <label htmlFor="show-answer">Show Correct Answers: </label>
                   <input
-                    className="form-check-input"
-                    type="checkbox"
                     id="show-answer"
+                    value={quiz.showCorrectAnswers}
+                    onChange={handleShowCorrectAnswerChange}
                   />
-                  <label className="form-check-label" htmlFor="show-answer">
-                    Show Correct Answers
-                  </label>
                 </div>
                 <div className="form-check mt-2">
                   <input
                     className="form-check-input"
                     type="checkbox"
                     id="one-question"
-                    checked
+                    checked={quiz.oneQuestionAtATime}
+                    onChange={handleOneQuestionAtATimeChange}
                   />
                   <label className="form-check-label" htmlFor="one-question">
                     One Question at a Time
@@ -279,6 +481,8 @@ function QuizzesDetails() {
                     className="form-check-input"
                     type="checkbox"
                     id="webcam"
+                    checked={quiz.webcamRequired}
+                    onChange={handleWebcamRequiredChange}
                   />
                   <label className="form-check-label" htmlFor="webcam">
                     Webcam Required
@@ -289,6 +493,8 @@ function QuizzesDetails() {
                     className="form-check-input"
                     type="checkbox"
                     id="lock-question"
+                    checked={quiz.lockQuestionsAfterAnswering}
+                    onChange={handleLockQuestionsAfterAnsweringChange}
                   />
                   <label className="form-check-label" htmlFor="lock-question">
                     Lock Questions After Answering
@@ -300,8 +506,8 @@ function QuizzesDetails() {
                     type="text"
                     id="access-code"
                     name="access-code"
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value)}
+                    value={quiz.accessCode}
+                    onChange={handleAccessCodeChange}
                   />
                 </div>
               </div>
@@ -329,6 +535,8 @@ function QuizzesDetails() {
                     value="Everyone"
                   />
                 </div>
+
+                {/* Three Date. */}
                 <div className="mb-1">
                   <label
                     htmlFor="quiz-due"
@@ -340,6 +548,8 @@ function QuizzesDetails() {
                     className="form-control pb-2"
                     id="quiz-due"
                     type="date"
+                    value={quiz.dueDate}
+                    onChange={handleDueChange}
                   />
 
                   <div className="row mb-1">
@@ -354,6 +564,8 @@ function QuizzesDetails() {
                         className="form-control pb-2"
                         id="quiz-available-from"
                         type="date"
+                        value={quiz.availableDate}
+                        onChange={handleAvailableDueChange}
                       />
                     </div>
                     <div className="col">
@@ -367,6 +579,8 @@ function QuizzesDetails() {
                         className="form-control pb-2"
                         id="quiz-available-until"
                         type="date"
+                        value={quiz.untilDate}
+                        onChange={handleUntilDateChange}
                       />
                     </div>
                   </div>
@@ -394,8 +608,7 @@ function QuizzesDetails() {
           <div>
             <button
               type="button"
-              //todo: navigate to quiz list screen
-              // onClick={handleCancel}
+              onClick={handleCancel}
               className="btn btn-secondary btn-outline-dark btn-lg btn-light me-2"
             >
               Cancel
@@ -403,8 +616,7 @@ function QuizzesDetails() {
 
             <button
               type="button"
-              //todo: save and navigate to quiz list screen
-              // onClick={handleSaveandPublish}
+              onClick={handleSaveandPublish}
               className="btn btn-secondary btn-outline-dark btn-lg btn-light me-2"
             >
               Save & Publish
@@ -412,8 +624,7 @@ function QuizzesDetails() {
 
             <button
               type="button"
-              //todo:  save and go to details screen
-              // onClick={handleSave}
+              onClick={handleSave}
               className="btn btn-primary btn-lg btn-danger "
             >
               Save
@@ -425,4 +636,4 @@ function QuizzesDetails() {
     </>
   );
 }
-export default QuizzesDetails;
+export default QuizzDetailsEditor;
