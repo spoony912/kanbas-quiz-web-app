@@ -20,8 +20,10 @@ function QuizDetails() {
   const navigateToQuizDetailsEditor = () => {
     navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Details`);
   };
-
-  const quiz = useSelector((state: KanbasState) => state.quizReducer.quiz);
+  const quizList = useSelector(
+    (state: KanbasState) => state.quizReducer.quizzes
+  );
+  const quiz = quizList.find((q) => q.course === courseId && q._id === quizId);
 
   useEffect(() => {
     if (typeof courseId === "string") {
@@ -31,6 +33,28 @@ function QuizDetails() {
     }
   }, [courseId, dispatch]);
 
+  const [quizPublish, updatePublish] = useState(
+    quiz ? quiz.isPublished : false
+  );
+
+  const handlePublish = (quizId: any | null, e: any) => {
+    e.preventDefault();
+    if (!quizId) return;
+    const quiz = quizList.find((q) => q._id === quizId);
+    if (quiz) {
+      const updatedQuiz = { ...quiz, isPublished: !quiz.published };
+      client.updateQuiz(updatedQuiz).then(() => {
+        dispatch(updateQuiz(updatedQuiz));
+      });
+    }
+  };
+
+  const handlePreviewClick = () => {
+    if (quiz?._id) {
+      navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quiz._id}/Preview`);
+    }
+  };
+
   return (
     <div className="quiz-details-container">
       <div className="quiz-controls">
@@ -39,7 +63,9 @@ function QuizDetails() {
         ) : (
           <button className="control-button gray">Unpublish</button>
         )}
-        <button className="control-button">Preview</button>
+        <button className="control-button" onClick={handlePreviewClick}>
+          Preview
+        </button>
         <button
           className="control-button"
           onClick={navigateToQuizDetailsEditor}
