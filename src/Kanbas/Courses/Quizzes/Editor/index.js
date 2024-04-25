@@ -3,8 +3,12 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { HiOutlineBan } from "react-icons/hi";
 import { HiEllipsisVertical } from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
+import { FaCheckCircle } from "react-icons/fa";
 import "./index.css";
 import { Editor } from "@tinymce/tinymce-react";
+import { CKEditor } from "@ckeditor/ckeditor5-react"; // rich text editor
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic"; // rich text editor
+
 import * as client from "../client";
 import { fetchQuizById } from "../client";
 
@@ -24,10 +28,11 @@ function QuizzDetailsEditor() {
     webcamRequired: false,
     lockQuestionsAfterAnswering: false,
     oneQuestionAtATime: true,
+    isPublished: false,
   });
 
   useEffect(() => {
-    if (quizId && quizId !== "new") {
+    if (quizId && quizId !== "NewQuiz") {
       fetchQuizById(courseId, quizId)
         .then((QuizDetails) => {
           setQuiz({
@@ -68,13 +73,16 @@ function QuizzDetailsEditor() {
             dueDate: QuizDetails.dueDate,
             availableDate: QuizDetails.availableDate,
             untilDate: QuizDetails.untilDate,
+            isPublished:
+              QuizDetails.isPublished !== undefined
+                ? QuizDetails.isPublished
+                : false,
           });
         })
         .catch((error) => {
           console.error("Error fetching quiz:", error);
         });
     } else {
-      //quiz database id / _id ???
       if (quiz._id !== null) {
         setQuiz({
           _id: quiz.length + 1,
@@ -100,22 +108,28 @@ function QuizzDetailsEditor() {
     }
   }, [courseId, quizId, quiz._id]);
 
-  // logic not sure
   const handleSave = () => {
     console.log("Saving quizDetails:", quiz);
 
     const saveOperation =
-      quizId === "new"
+      quizId === "NewQuiz"
         ? client.createQuiz(courseId, quiz) // Create a new quiz
         : client.updateQuizDetails(courseId, quizId, quiz); // Update existing quiz
 
+    // saveOperation
+    //   .then(() => {
+    //     navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}`);
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error saving quiz:", error);
+    //   });
+
     saveOperation
-      .then(() => {
-        // After a successful operation, navigate back to details page
-        navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}`);
+      .then((response) => {
+        const newQuizId = quizId === "NewQuiz" ? response._id : quizId;
+        navigate(`/Kanbas/Courses/${courseId}/Quizzes/${newQuizId}`);
       })
       .catch((error) => {
-        // Log any errors encountered during the save operation
         console.error("Error saving quiz:", error);
       });
   };
@@ -128,7 +142,9 @@ function QuizzDetailsEditor() {
   //todo: navigate to quiz list screen, save the quiz and publish the quiz
   const handleSaveandPublish = () => {
     console.log("Saving quizDetails:", quiz);
-
+    if (!quiz.isPublished) {
+      quiz.isPublished = true;
+    }
     const saveOperation =
       quizId === "new"
         ? client.createQuiz(courseId, quiz) // Create a new quiz
@@ -276,12 +292,21 @@ function QuizzDetailsEditor() {
         <div className="me-3">Points {quiz.points}</div>
 
         {/* todo: publish status update */}
-        <div className="me-3" style={{ color: "gray" }}>
+        {/* <div className="me-3" style={{ color: "gray" }}>
           <HiOutlineBan /> Not Published
-        </div>
-        <button type="button" className="btn btn-outline-dark btn-light">
+        </div> */}
+        {/* <button type="button" className="btn btn-outline-dark btn-light">
           <HiEllipsisVertical />
-        </button>
+        </button> */}
+        {quiz.isPublished ? (
+          <div className="me-3" style={{ color: "green" }}>
+            <FaCheckCircle /> isPublished
+          </div>
+        ) : (
+          <div className="me-3" style={{ color: "gray" }}>
+            <HiOutlineBan /> Not isPublished
+          </div>
+        )}
       </div>
       <hr className="me-4" />
 
@@ -317,20 +342,20 @@ function QuizzDetailsEditor() {
         <br />
         {/* ------------Quiz instructions editor------------------- */}
         Quiz Instructions: <br />
-        <Editor
-          apiKey="81zmyhxc6njj4nq5jzzfeq4h70yojjr4aki254xmhai5dcwz"
-          onEditorChange={(newValue, editor) => {
-            setValue(newValue);
-            setText(editor.getContent({ format: "text" }));
-          }}
-          onInit={(evt, editor) => {
-            setText(editor.getContent({ format: "text" }));
-          }}
-          init={{
-            plugins:
-              "a11ychecker advcode advlist advtable anchor autocorrect autolink autoresize autosave casechange charmap checklist code codesample directionality editimage emoticons export footnotes formatpainter fullscreen help image importcss inlinecss insertdatetime link linkchecker lists media mediaembed mentions mergetags nonbreaking pagebreak pageembed permanentpen powerpaste preview quickbars save searchreplace table tableofcontents template tinydrive tinymcespellchecker typography visualblocks visualchars wordcount",
-          }}
-        />
+        {/* rich text editor */}
+        <div className="editor mb-5">
+          <CKEditor
+            editor={ClassicEditor}
+            data={text}
+            onEditorChange={(newValue, editor) => {
+              setValue(newValue);
+              setText(editor.getContent({ format: "text" }));
+            }}
+            onInit={(evt, editor) => {
+              setText(editor.getContent({ format: "text" }));
+            }}
+          />
+        </div>
       </div>
       <div className="container">
         <div className="d-flex justify-content-left">

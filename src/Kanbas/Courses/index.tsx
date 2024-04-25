@@ -21,13 +21,13 @@ import AssignmentEditor from "./Assignments/Editor";
 import Grades from "./Grades";
 import React, { useState, useEffect } from "react";
 import * as client from "../Courses/client";
-import Quiz from "./Quizzes";
-import axios from "axios";
-
-import QuizzesDetails from "./Quizzes/Editor/index";
+// quiz
 import QuizQuestionMain from "./Quizzes/Editor/quizQuestionMain";
-import QuizDetailAndQuestion from "./Quizzes";
 import MultipleChoiceQuestion from "./Quizzes/Editor/MultipleChoiceQuestion";
+import QuizList from "./Quizzes/List";
+import QuizDetails from "./Quizzes/Details";
+import QuizzDetailsEditor from "./Quizzes/Editor";
+import Preview from "./Quizzes/Preview";
 // ------ interface
 interface Course {
   _id: string;
@@ -98,20 +98,28 @@ function Courses({ courses }: CoursesProps) {
             <Route path="Modules" element={<Modules />} />
             <Route path="Piazza" element={<h1>Piazza</h1>} />
             <Route path="Assignments" element={<Assignments />} />
-
             <Route
               path="Assignments/:assignmentId"
               element={<AssignmentEditor />}
             />
             <Route path="Assignments" element={<h1>Assignment Editor</h1>} />
-
-            {/* quiz */}
-            <Route path="Quizzes" element={<QuizDetailAndQuestion />} />
-            <Route path="Quizzes/Details" element={<QuizzesDetails />} />
-            <Route path="Quizzes/Questions" element={<QuizQuestionMain />} />
-            <Route path="Quizzes/NewQuestions" element={<MultipleChoiceQuestion />} />
-            {/* quiz */}
-
+            {/* ----------------Quizzes Part---------------- */}{" "}
+            <Route path="Quizzes" element={<QuizList />} />
+            <Route path="Quizzes/:quizId" element={<QuizDetails />} />
+            <Route
+              path="Quizzes/:quizId/Details"
+              element={<QuizzDetailsEditor />}
+            />
+            <Route
+              path="Quizzes/:quizId/Questions"
+              element={<QuizQuestionMain />}
+            />
+            <Route
+              path="Quizzes/:quizId/Questions/NewQuestions"
+              element={<MultipleChoiceQuestion />}
+            />
+            <Route path="Quizzes/:quizId/Preview" element={<Preview />} />
+            {/* ----------------Quizzes Part---------------- */}
             <Route path="Grades" element={<Grades />} />
           </Routes>
         </div>

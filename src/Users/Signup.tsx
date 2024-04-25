@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { ReactHTMLElement, useState } from "react";
 import { useNavigate } from "react-router";
 import * as client from "./client";
 
@@ -12,39 +12,56 @@ interface ErrorResponse {
 }
 
 export default function Signup() {
-  const [error, setError] = useState("");
   const [user, setUser] = useState({
     username: "",
     password: "",
   });
   const navigate = useNavigate();
-  const signup = async () => {
+
+  const handleSignup = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    e.preventDefault();
     try {
-      await client.signup(user);
+      const newUser = await client.signup(user);
+      console.log(`new user: ${newUser}`);
       navigate("/Kanbas/Account/Profile");
     } catch (err) {
-      const error = err as ErrorResponse;
-      setError(error.response.data.message);
+      console.log(e);
     }
   };
 
+  const handleSignin = async () => {
+    navigate(`/Kanbas/Account/Signin`);
+  };
+
   return (
-    <div>
+    <form onSubmit={handleSignup}>
       <h1>Signup</h1>
-      {error && <div>{error}</div>}
       <input
         className="form-control"
         value={user.username}
+        placeholder="username"
         onChange={(e) => setUser({ ...user, username: e.target.value })}
       />
       <input
         className="form-control"
         value={user.password}
+        placeholder="password"
         onChange={(e) => setUser({ ...user, password: e.target.value })}
       />
-      <button className="btn btn-primary" onClick={signup}>
+      <button
+        type="submit"
+        className="btn btn-primary mt-2"
+        // disabled={user.username === "" || user.password === ""}
+      >
         Signup
       </button>
-    </div>
+      <br />
+      <button className="btn btn-primary mt-2" onClick={handleSignin}>
+        Back to Signin
+      </button>
+      <br />
+    </form>
   );
 }

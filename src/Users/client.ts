@@ -30,29 +30,6 @@ export const profile = async () => {
   return response.data;
 };
 
-// export const profile = async () => {
-//   try {
-//     const response = await axios.get(`${USERS_API}/profile`);
-//     return response.data;
-//   } catch (error) {
-//     console.error("Failed to fetch profile:", error);
-//     // Optionally, return a default state or handle the error as needed
-//     throw error; // or handle differently
-//   }
-// };
-
-// export const profile = async () => {
-//   try {
-//     const response = await axios.get(`${USERS_API}/profile`, {
-//       withCredentials: true, // Include this option
-//     });
-//     return response.data;
-//   } catch (error) {
-//     console.error("Failed to fetch profile:", error);
-//     throw error;
-//   }
-// };
-
 // update
 export const updateUser = async (user: any) => {
   const response = await request.put(`${USERS_API}/${user._id}`, user);
@@ -64,11 +41,7 @@ export const findAllUsers = async () => {
   const response = await request.get(`${USERS_API}`);
   return response.data;
 };
-// register
-export const registerUser = async (user: any) => {
-  const response = await request.post(`${USERS_API}/register`, user);
-  return response.data;
-};
+
 // create
 export const createUser = async (user: any) => {
   const response = await request.post(`${USERS_API}`, user);

@@ -25,22 +25,9 @@ export default function Signin() {
       console.log(e);
     }
   };
-  // ----------------- 2 -----------------
-  //   const [user, setUser] = useState({
-  //     username: "",
-  //     password: "",
-  //   });
-  //   const navigate = useNavigate();
-  //   // sign in button
-  //   const signin = async () => {
-  //     try {
-  //       const existingUser = await client.signin(user);
-  //       console.log(existingUser);
-  //       navigate("/Kanbas/Account/Profile");
-  //     } catch (e) {
-  //       console.log(e);
-  //     }
-  //   };
+  const handleSignup = async () => {
+    navigate(`/Kanbas/Account/Signup`);
+  };
 
   return (
     <div>
@@ -62,8 +49,12 @@ export default function Signin() {
           setCredentials({ ...credentials, password: e.target.value })
         }
       />
-      <button className="btn btn-primary " onClick={signin}>
+      <button className="btn btn-primary mb-2 mt-2" onClick={signin}>
         Signin
+      </button>
+      <br />
+      <button className="btn btn-primary " onClick={handleSignup}>
+        Signup
       </button>
     </div>
   );

@@ -8,36 +8,46 @@ import * as client from "../client";
 export default function MultipleChoiceQuestion() {
   const { courseId, quizId } = useParams();
   const navigate = useNavigate();
-  const [text, setText] = useState("How much is 1 + 1");
+  const [text, setText] = useState("How much is 1 + 1 ?");
+  const [questionType, setQuestionType] = useState("Multiple Choice"); // questionType
   const [question, setQuestion] = useState({
     title: "",
     description: "",
     point: 1,
-    choices: [{ id: 1, text: "", isCorrect: true }],
+    questionType: "Multiple Choice",
+    choices: [
+      { id: 1, text: "True", isCorrect: false },
+      // { id: 2, text: "False", isCorrect: false },
+    ],
   });
+  // delete
+  // const [choices, setChoices] = useState([
+  //   { id: 1, text: "True", isCorrect: false },
+  //   { id: 2, text: "False", isCorrect: false },
+  // ]);
+
   // filter quiz
-  const [quizType, setQuizType] = useState("Multiple Choice");
-  const fetchQuizByType = async (type) => {
-    const quiz = await client.findQuizByType(type);
+  const fetchQuestionByType = async (type) => {
+    const quiz = await client.findQuestionByType(type);
     setQuestion({ ...question, quiz });
   };
 
   useEffect(() => {
-    switch (quizType) {
-      case "Multiple Choice":
-        setText("How much is 1 + 1");
-        break;
-      case "True/False":
-        setText("1 + 1 = 2");
-        break;
-      case "Fill In Multiple Blanks":
-        setText("1 + 1 is _____");
-        break;
-      default:
-        setText("Enter your question here.");
-        break;
+    if (questionType === "True/False") {
+      setText("Is 1 + 1 = 2 ?");
+      setQuestion({
+        ...question,
+        choices: [
+          { id: 1, text: "True", isCorrect: question.choices[0]?.isCorrect },
+          { id: 2, text: "False", isCorrect: question.choices[1]?.isCorrect },
+        ],
+      });
+    } else if (questionType === "Multiple Choice") {
+      setText("How much is 1 + 1 ?");
+    } else {
+      setText("1 + 1 is _____");
     }
-  }, [quizType]);
+  }, [questionType]);
 
   // add another answer
   const addChoice = () => {
@@ -56,30 +66,19 @@ export default function MultipleChoiceQuestion() {
     );
     setQuestion({ ...question, choices: newChoices });
   };
-  // button save
-  // const handleSave = () => {
-  //   const newQuestion = { ...question, description: text };
-  //   // const saveOperation = question._id
-  //   //   ? client.updateQuiz(newQuestion)
-  //   //   : client.createQuiz(courseId, newQuestion);
-
-  //   // saveOperation.then(() => {
-  //   //   navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions`);
-  //   // });
-  //   // .catch((error) => {
-  //   //   console.log("Error saving question:", error);
-  //   // });
-  //   const saveOperation = client.createQuestion(courseId, quizId, newQuestion);
-  //   saveOperation.then(() => {
-  //     navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions`);
-  //   });
-  // };
 
   const handleSave = async () => {
     try {
       const questionData = {
         text: text, // The text from CKEditor
-        // add additional fields if necessary
+        points: question.point, // Points for the question
+        questionType: questionType,
+        // new added
+        choices: question.choices.map((choice) => ({
+          // Properly format choices to exclude the 'id' if it's not needed
+          text: choice.text,
+          isCorrect: choice.isCorrect,
+        })),
       };
       const response = await client.createQuestion(
         courseId,
@@ -87,17 +86,66 @@ export default function MultipleChoiceQuestion() {
         questionData
       );
       console.log("Question saved:", response);
-      // Additional handling like clearing the editor or showing success message
     } catch (error) {
       console.error("Failed to save question:", error);
-      // Error handling
     }
     navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions`);
   };
   // button cancel
   const handleCancel = () =>
     navigate(`/Kanbas/Courses/${courseId}/Quizzes/${quizId}/Questions`);
+  // Handle the change in quiz type
+  // const handleQuizTypeChange = (event) => {
+  //   const type = event.target.value;
+  //   setQuizType(type);
+  //   if (type === "True/False") {
+  //     setChoices([
+  //       { id: 1, text: "True", isCorrect: false },
+  //       { id: 2, text: "False", isCorrect: false },
+  //     ]);
+  //   } else {
+  //     setChoices([]); // Clear choices for other types, assuming multiple choice starts empty
+  //   }
+  // };
+  const handleQuestionTypeChange = (event) => {
+    const type = event.target.value;
+    setQuestionType(type);
+    if (type === "True/False") {
+      setQuestion({
+        ...question,
+        choices: [
+          { id: 1, text: "True", isCorrect: false },
+          { id: 2, text: "False", isCorrect: false },
+        ],
+      });
+    } else if (type === "Fill In Multiple Blanks") {
+      setQuestion({
+        ...question,
+        choices: [{ id: 1, text: "", correctAnswers: [""] }],
+      });
+    } else {
+      setQuestion({ ...question, choices: [] }); // Clear choices for other types
+    }
+  };
 
+  // Update choice to mark it as correct
+  // const handleChoiceChange = (id) => {
+  //   setChoices(
+  //     choices.map((choice) => ({ ...choice, isCorrect: choice.id === id }))
+  //   );
+  // };
+  const handleChoiceChange = (id) => {
+    setQuestion({
+      ...question,
+      choices: question.choices.map((choice) => ({
+        ...choice,
+        isCorrect: choice.id === id,
+      })),
+    });
+  };
+
+  // set correct answer
+  const setCorrectAnswer = async () => {};
   return (
     <div
       className="mt-3"
@@ -106,7 +154,7 @@ export default function MultipleChoiceQuestion() {
         alignItems: "center",
       }}
     >
-      <h1>{quizType} Quiz</h1>
+      <h1>{questionType} Quiz</h1>
       <div
         className="mt-3"
         style={{
@@ -131,12 +179,13 @@ export default function MultipleChoiceQuestion() {
         <select
           className="form-control"
           style={{ width: "200px" }}
-          value={quizType}
-          onChange={(e) => {
-            const selectedType = e.target.value;
-            setQuizType(selectedType);
-            fetchQuizByType(selectedType);
-          }}
+          value={questionType}
+          // onChange={(e) => {
+          //   const selectedType = e.target.value;
+          //   setQuizType(selectedType);
+          //   fetchQuizByType(selectedType);
+          // }}
+          onChange={handleQuestionTypeChange}
         >
           <option value="Multiple Choice">Multiple Choice</option>
           <option value="True/False">True/False</option>
@@ -179,13 +228,101 @@ export default function MultipleChoiceQuestion() {
         />
       </div>
 
-      {/* answer part */}
-      <div>
-        <h4>Answers:</h4>
-        {/* correct answer */}
-        <div className="mb-2">
-          <p style={{ color: "green" }}>
-            Correct Answer:
+      {/* answer management */}
+      <h3>Answers:</h3>
+      <p style={{ color: "green" }}>
+        Correct Answer:{" "}
+        <button
+          className="btn btn-light"
+          style={{ border: "none", marginLeft: "10px" }}
+        >
+          edit
+        </button>
+        <button
+          className="btn btn-light"
+          style={{ border: "none", marginLeft: "10px" }}
+        >
+          delete
+        </button>
+        <button
+          className="btn btn-light"
+          style={{ border: "none", marginLeft: "10px" }}
+        >
+          <BsThreeDots size={24} style={{ color: "#333" }} />
+        </button>
+      </p>
+
+      {/* correct answer */}
+      {/* {quizType === "True/False" ? (
+        // if true/false question
+        <label>
+          <input type="radio" />
+        </label>
+      ) : (
+        // non true/false question
+
+        <input placeholder="correct answer" className="form-control" />
+      )} */}
+      {questionType === "True/False" ? (
+        <div>
+          <label>
+            <input
+              type="radio"
+              value="True"
+              checked={question.choices[0].isCorrect}
+              onChange={() => handleChoiceChange(1)} // Assuming the first choice is "True"
+            />
+            True
+          </label>
+          <label>
+            <input
+              type="radio"
+              value="False"
+              checked={question.choices[1].isCorrect}
+              onChange={() => handleChoiceChange(2)} // Assuming the second choice is "False"
+            />
+            False
+          </label>
+        </div>
+      ) : (
+        <input
+          placeholder="Enter the correct answer"
+          className="form-control"
+          onChange={(e) => setCorrectAnswer(e.target.value)}
+        />
+      )}
+
+      <div
+        style={{ display: "flex", justifyContent: "flex-end" }}
+        className="mt-2"
+      >
+        <button
+          className="btn btn-light"
+          style={{ border: "none", marginLeft: "10px" }}
+          onClick={addChoice}
+        >
+          + Add Another Answer
+        </button>
+
+        {/* possible answers */}
+      </div>
+      {question.choices.map((choice, index) => (
+        <div>
+          <p style={{ color: "red" }}>
+            Possible Answer:
+            <button
+              className="btn btn-light"
+              style={{ border: "none", marginLeft: "10px" }}
+            >
+              edit
+            </button>
+            <button
+              className="btn btn-light"
+              style={{ border: "none", marginLeft: "10px" }}
+              onClick={() => deleteChoice(choice.id)}
+            >
+              delete
+            </button>
             <button
               className="btn btn-light"
               style={{ border: "none", marginLeft: "10px" }}
@@ -193,47 +330,10 @@ export default function MultipleChoiceQuestion() {
               <BsThreeDots size={24} style={{ color: "#333" }} />
             </button>
           </p>
-          <input placeholder="correct answers" className="form-control" />
+          <input placeholder="possible answers" className="form-control" />
         </div>
+      ))}
 
-        {/* button: add another answer */}
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <button
-            className="btn btn-light"
-            style={{ border: "none", marginLeft: "10px" }}
-            onClick={addChoice}
-          >
-            + Add Another Answer
-          </button>
-        </div>
-        {question.choices.map((choice, index) => (
-          <div>
-            <p style={{ color: "red" }}>
-              Possible Answer:
-              <button
-                className="btn btn-light"
-                style={{ border: "none", marginLeft: "10px" }}
-              >
-                edit
-              </button>
-              <button
-                className="btn btn-light"
-                style={{ border: "none", marginLeft: "10px" }}
-                onClick={() => deleteChoice(choice.id)}
-              >
-                delete
-              </button>
-              <button
-                className="btn btn-light"
-                style={{ border: "none", marginLeft: "10px" }}
-              >
-                <BsThreeDots size={24} style={{ color: "#333" }} />
-              </button>
-            </p>
-            <input placeholder="possible answers" className="form-control" />
-          </div>
-        ))}
-      </div>
       {/* save and cancel --- return to previous page */}
       <div className="mt-5">
         <button

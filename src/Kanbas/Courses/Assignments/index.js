@@ -50,7 +50,7 @@ function Assignments() {
       (each) => each.course === courseId
     )
   );
-  const navigate = useNavigate(); // Initialize the useNavigate hook
+  const navigate = useNavigate(); 
   const navigateToAssignmentEditor = () => {
     navigate(`/Kanbas/Courses/${courseId}/Assignments/new`);
   };
