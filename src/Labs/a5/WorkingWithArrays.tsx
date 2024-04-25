@@ -53,7 +53,7 @@ function WorkingWithArrays() {
   // new: todo: delete
   const deleteTodo = async (todo: any) => {
     try {
-      const response = await axios.delete(`${API}/${todo.id}`);
+      // const response = await axios.delete(`${API}/${todo.id}`);
       setTodos(todos.filter((t) => t.id !== todo.id));
     } catch (error) {
       const message =
@@ -81,7 +81,7 @@ function WorkingWithArrays() {
   // update todo
   const updateTodo = async () => {
     try {
-      const response = await axios.put(`${API}/${todo.id}`, todo);
+      // const response = await axios.put(`${API}/${todo.id}`, todo);
       setTodos(todos.map((t) => (t.id === todo.id ? todo : t)));
       const blankState = {
         id: 0,

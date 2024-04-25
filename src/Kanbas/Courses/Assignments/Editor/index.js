@@ -3,13 +3,13 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { BsThreeDotsVertical } from "react-icons/bs"; // icon
 import { TbCircleCheckFilled } from "react-icons/tb"; // icon
 // import reducer
-import {
-  addAssignment,
-  deleteAssignment,
-  updateAssignment,
-  selectAssignment,
-} from "../assignmentsReducer";
-import { KanbasState } from "../../../store";
+// import {
+//   addAssignment,
+//   deleteAssignment,
+//   updateAssignment,
+//   selectAssignment,
+// } from "../assignmentsReducer";
+// import { KanbasState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
 import * as client from "../client";
 
@@ -17,7 +17,7 @@ function AssignmentEditor() {
   const { assignmentId, courseId } = useParams();
   // const assignment = db.assignments.find((each) => each._id === assignmentId); // find assignment
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   const assignments = useSelector((state) =>
     state.assignmentsReducer.assignments.filter(

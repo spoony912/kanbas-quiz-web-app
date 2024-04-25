@@ -26,7 +26,7 @@ export default function Profile() {
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  },[]);
 
   const save = async () => {
     await client.updateUser(profile);

@@ -1,15 +1,15 @@
-import React, { ReactHTMLElement, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import * as client from "./client";
 
 // Define an interface for the error structure
-interface ErrorResponse {
-  response: {
-    data: {
-      message: string;
-    };
-  };
-}
+// interface ErrorResponse {
+//   response: {
+//     data: {
+//       message: string;
+//     };
+//   };
+// }
 
 export default function Signup() {
   const [user, setUser] = useState({
